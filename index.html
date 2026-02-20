@@ -41,6 +41,7 @@ cursor:pointer;font-weight:bold;
 display:none;background:#fff8e1;padding:10px;border-radius:6px;
 margin-bottom:10px;font-size:13px;border:1px solid #e0c97f;
 }
+.info-icon{color:red;cursor:pointer;margin-left:5px;font-weight:bold;}
 .qr{width:230px;display:block;margin:15px auto;}
 .small{font-size:12px;color:#777;text-align:center;margin-bottom:10px;}
 hr{border:none;border-top:1px solid #ddd;}
@@ -64,11 +65,18 @@ hr{border:none;border-top:1px solid #ddd;}
 <input type="text" id="userName">
 
 <div class="radio-group">
-<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab</label>
-<label><input type="radio" name="nisab" value="gold"> Gold Nisab</label>
+<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab (వెండి)</label>
+<label><input type="radio" name="nisab" value="gold"> Gold Nisab (బంగారం)</label>
 </div>
 
-<div class="section-title">Precious Metals</div>
+<div class="section-title">
+Precious Metals
+<span class="info-icon" onclick="toggleInfo('metalInfo')">*</span>
+</div>
+
+<div id="metalInfo" class="tooltip">
+Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include karein.
+</div>
 
 <label>Gold (grams)</label>
 <input type="number" id="goldGrams">
@@ -82,7 +90,14 @@ hr{border:none;border-top:1px solid #ddd;}
 <label>Silver Price per gram (₹)</label>
 <input type="number" id="silverPrice">
 
-<div class="section-title">Other Assets</div>
+<div class="section-title">
+Other Assets
+<span class="info-icon" onclick="toggleInfo('assetInfo')">*</span>
+</div>
+
+<div id="assetInfo" class="tooltip">
+Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab include karein.
+</div>
 
 <label>Cash in Hand (₹)</label>
 <input type="number" id="cash">
@@ -96,7 +111,14 @@ hr{border:none;border-top:1px solid #ddd;}
 <label>Receivables / Investments (₹)</label>
 <input type="number" id="otherAssets">
 
-<div class="section-title">Liabilities</div>
+<div class="section-title">
+Liabilities
+<span class="info-icon" onclick="toggleInfo('liabilityInfo')">*</span>
+</div>
+
+<div id="liabilityInfo" class="tooltip">
+Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus karein.
+</div>
 
 <label>Total Liabilities (₹)</label>
 <input type="number" id="liability">
@@ -104,6 +126,22 @@ hr{border:none;border-top:1px solid #ddd;}
 <div class="result" id="result"></div>
 
 <button class="button" onclick="downloadPDF()">Download PDF</button>
+
+<hr>
+
+<div class="section-title">
+About Madarsa
+<span class="info-icon" onclick="toggleInfo('madarsaInfo')">*</span>
+</div>
+
+<div id="madarsaInfo" class="tooltip">
+Madarsa Salihaat Lilbanaat Khammam.<br>
+20+ ladkiyan Nazira Quran mukammal kar chuki hain.<br>
+2 ladkiyan 20 para hifz mukammal kar chuki hain.<br>
+6 bachiyon ne tailoring training complete ki.<br>
+Deeni taleem ke sath bunyadi school education bhi di ja rahi hai.<br>
+Aap apni Zakat, Sadaqa, Fitra ke zariye madarse ka taawun kar sakte hain.
+</div>
 
 <hr>
 
@@ -120,27 +158,13 @@ UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
 <script>
 
+function toggleInfo(id){
+let el=document.getElementById(id);
+el.style.display=el.style.display==="block"?"none":"block";
+}
+
 function formatINR(num){
 return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-async function loadRates(){
-try{
-let response = await fetch("rates.json");
-let data = await response.json();
-
-goldPrice.value = data.gold;
-silverPrice.value = data.silver;
-
-document.getElementById("rateInfo").innerText =
-"Rates last updated: " + data.lastUpdated;
-
-calculateZakat();
-
-}catch(e){
-document.getElementById("rateInfo").innerText =
-"Unable to load live rates.";
-}
 }
 
 function calculateZakat(){
@@ -186,17 +210,30 @@ result.innerText=output;
 document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculateZakat));
 document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("change",calculateZakat));
 
-async function showHijri(){
+function showHijri(){
 try{
 const today=new Date();
-const response=await fetch(`https://api.aladhan.com/v1/gToH?date=${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`);
-const data=await response.json();
-const h=data.data.hijri;
+const hijri=today.toLocaleDateString('en-TN-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});
 document.getElementById("hijriDate").innerText =
-"Hijri Date (Global): "+h.day+" "+h.month.en+" "+h.year+" AH";
+"Hijri Date (Calculated – Global): "+hijri+" AH";
 }catch(e){}
 }
 showHijri();
+
+async function loadRates(){
+try{
+let response=await fetch("rates.json");
+let data=await response.json();
+goldPrice.value=data.gold;
+silverPrice.value=data.silver;
+document.getElementById("rateInfo").innerText =
+"Rates last updated: "+data.lastUpdated;
+calculateZakat();
+}catch(e){
+document.getElementById("rateInfo").innerText="Unable to load live rates.";
+}
+}
+window.onload=loadRates;
 
 function downloadPDF(){
 const { jsPDF }=window.jspdf;
@@ -226,8 +263,6 @@ y+=8;
 
 doc.save("Zakat_Report.pdf");
 }
-
-window.onload=loadRates;
 
 </script>
 
