@@ -37,7 +37,6 @@ background:#d4af37;border:none;border-radius:6px;
 cursor:pointer;font-weight:bold;
 }
 .footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
-.info-icon{color:red;cursor:pointer;margin-left:5px;font-weight:bold;}
 .tooltip{
 display:none;background:#fff8e1;padding:10px;border-radius:6px;
 margin-bottom:10px;font-size:13px;border:1px solid #e0c97f;
@@ -45,10 +44,6 @@ margin-bottom:10px;font-size:13px;border:1px solid #e0c97f;
 .qr{width:230px;display:block;margin:15px auto;}
 .small{font-size:12px;color:#777;text-align:center;margin-bottom:10px;}
 hr{border:none;border-top:1px solid #ddd;}
-.admin-panel{
-display:none;margin-top:20px;padding:15px;
-background:#f9f9f9;border:1px solid #ccc;border-radius:6px;
-}
 </style>
 </head>
 
@@ -63,44 +58,31 @@ background:#f9f9f9;border:1px solid #ccc;border-radius:6px;
 <h2>Zakat Calculator (జకాత్ లెక్కింపు సాధనం)</h2>
 
 <div id="hijriDate" class="small"></div>
+<div id="rateInfo" class="small"></div>
 
 <label>Optional Name (పేరు – ఐచ్చికం)</label>
 <input type="text" id="userName">
 
 <div class="radio-group">
-<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab (వెండి)</label>
-<label><input type="radio" name="nisab" value="gold"> Gold Nisab (బంగారం)</label>
+<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab</label>
+<label><input type="radio" name="nisab" value="gold"> Gold Nisab</label>
 </div>
 
-<div class="section-title">
-Precious Metals (బంగారం & వెండి)
-<span class="info-icon" onclick="toggleInfo('metalInfo')">*</span>
-</div>
-
-<div id="metalInfo" class="tooltip">
-Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include karein.
-</div>
+<div class="section-title">Precious Metals</div>
 
 <label>Gold (grams)</label>
 <input type="number" id="goldGrams">
 
 <label>Gold Price per gram (₹)</label>
-<input type="number" id="goldPrice" value="15649">
+<input type="number" id="goldPrice">
 
 <label>Silver (grams)</label>
 <input type="number" id="silverGrams">
 
 <label>Silver Price per gram (₹)</label>
-<input type="number" id="silverPrice" value="270">
+<input type="number" id="silverPrice">
 
-<div class="section-title">
-Other Assets (ఇతర ఆస్తులు)
-<span class="info-icon" onclick="toggleInfo('assetInfo')">*</span>
-</div>
-
-<div id="assetInfo" class="tooltip">
-Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab include karein.
-</div>
+<div class="section-title">Other Assets</div>
 
 <label>Cash in Hand (₹)</label>
 <input type="number" id="cash">
@@ -114,14 +96,7 @@ Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab inc
 <label>Receivables / Investments (₹)</label>
 <input type="number" id="otherAssets">
 
-<div class="section-title">
-Liabilities (బాకీలు)
-<span class="info-icon" onclick="toggleInfo('liabilityInfo')">*</span>
-</div>
-
-<div id="liabilityInfo" class="tooltip">
-Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus karein.
-</div>
+<div class="section-title">Liabilities</div>
 
 <label>Total Liabilities (₹)</label>
 <input type="number" id="liability">
@@ -132,45 +107,12 @@ Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus kar
 
 <hr>
 
-<div class="section-title">
-About Madarsa (మదరసా వివరాలు)
-<span class="info-icon" onclick="toggleInfo('madarsaInfo')">*</span>
-</div>
-
-<div id="madarsaInfo" class="tooltip">
-Madarsa Salihaat Lilbanaat Khammam.<br><br>
-20+ ladkiyan Nazira Quran mukammal kar chuki hain.<br>
-2 ladkiyan 20 para hifz mukammal kar chuki hain.<br>
-6 bachiyon ne tailoring training complete ki.<br>
-Deeni taleem ke sath bunyadi school education bhi di ja rahi hai.<br><br>
-Aap apni Zakat, Sadaqa, Fitra, Atiya ke zariye madarse ka taawun kar sakte hain.
-</div>
-
-<hr>
-
 <b>Support Madarsa:</b><br>
 UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
 <img src="donation-qr.png" class="qr">
 
-<a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Madarsa%20Donation&cu=INR">
-<button class="button">Pay via UPI</button>
-</a>
-
 <hr>
-
-<button class="button" onclick="showAdmin()">Admin Login</button>
-
-<div class="admin-panel" id="adminPanel">
-<h3>Admin Rate Update</h3>
-<label>Update Gold Price (₹)</label>
-<input type="number" id="adminGold">
-
-<label>Update Silver Price (₹)</label>
-<input type="number" id="adminSilver">
-
-<button class="button" onclick="saveRates()">Save Rates</button>
-</div>
 
 <div class="footer">Powered by Noon Enterprises</div>
 
@@ -178,13 +120,27 @@ UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
 <script>
 
-function toggleInfo(id){
-let el=document.getElementById(id);
-el.style.display=el.style.display==="block"?"none":"block";
-}
-
 function formatINR(num){
 return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+async function loadRates(){
+try{
+let response = await fetch("rates.json");
+let data = await response.json();
+
+goldPrice.value = data.gold;
+silverPrice.value = data.silver;
+
+document.getElementById("rateInfo").innerText =
+"Rates last updated: " + data.lastUpdated;
+
+calculateZakat();
+
+}catch(e){
+document.getElementById("rateInfo").innerText =
+"Unable to load live rates.";
+}
 }
 
 function calculateZakat(){
@@ -271,33 +227,7 @@ y+=8;
 doc.save("Zakat_Report.pdf");
 }
 
-function showAdmin(){
-let pass=prompt("Enter Admin Password:");
-if(pass==="noon2026"){
-adminPanel.style.display="block";
-}else{
-alert("Access Denied");
-}
-}
-
-function saveRates(){
-let g=adminGold.value;
-let s=adminSilver.value;
-localStorage.setItem("goldRate",g);
-localStorage.setItem("silverRate",s);
-goldPrice.value=g;
-silverPrice.value=s;
-alert("Rates Updated");
-calculateZakat();
-}
-
-window.onload=function(){
-let savedGold=localStorage.getItem("goldRate");
-let savedSilver=localStorage.getItem("silverRate");
-if(savedGold){goldPrice.value=savedGold;}
-if(savedSilver){silverPrice.value=savedSilver;}
-calculateZakat();
-}
+window.onload=loadRates;
 
 </script>
 
