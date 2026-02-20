@@ -17,7 +17,7 @@ display:flex;align-items:center;justify-content:center;text-align:center;
 }
 .ayah{color:#d4af37;font-family:'Amiri',serif;font-size:28px;padding:20px;}
 .container{
-padding:20px;max-width:700px;margin:-40px auto 40px;
+padding:20px;max-width:750px;margin:-40px auto 40px;
 background:white;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 h2{text-align:center;}
@@ -28,7 +28,6 @@ width:100%;padding:10px;margin:6px 0 12px;
 border-radius:6px;border:1px solid #ccc;
 }
 .radio-group{display:flex;justify-content:center;gap:20px;margin-bottom:10px;}
-.note{font-size:12px;color:#555;margin-bottom:10px;}
 .result{
 margin-top:20px;padding:15px;background:#f0f0f0;
 border-radius:6px;font-weight:bold;
@@ -38,10 +37,16 @@ width:100%;padding:12px;margin-top:10px;
 background:#d4af37;border:none;border-radius:6px;
 cursor:pointer;font-weight:bold;
 }
-.footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
 .contact{margin-top:20px;padding:15px;background:#fafafa;border-radius:6px;}
+.footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
+.info-icon{color:red;cursor:pointer;margin-left:5px;font-weight:bold;}
+.tooltip{
+display:none;background:#fff8e1;padding:10px;border-radius:6px;
+margin-bottom:10px;font-size:13px;border:1px solid #e0c97f;
+}
+.qr{width:220px;display:block;margin:15px auto;}
+.small{font-size:12px;color:#777;text-align:center;margin-bottom:10px;}
 hr{border:none;border-top:1px solid #ddd;}
-.small{font-size:12px;color:#777;}
 </style>
 </head>
 
@@ -55,77 +60,83 @@ hr{border:none;border-top:1px solid #ddd;}
 
 <h2>Zakat Calculator (జకాత్ లెక్కింపు సాధనం)</h2>
 
-<div id="hijriDate" class="small" style="text-align:center;margin-bottom:10px;"></div>
+<div id="hijriDate" class="small"></div>
+
+<label>Optional Name (పేరు – ఐచ్చికం)</label>
+<input type="text" id="userName" placeholder="Enter your name (మీ పేరు నమోదు చేయండి)">
 
 <div class="radio-group">
-<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab (వెండి నిసాబ్)</label>
-<label><input type="radio" name="nisab" value="gold"> Gold Nisab (బంగారం నిసాబ్)</label>
+<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab (వెండి)</label>
+<label><input type="radio" name="nisab" value="gold"> Gold Nisab (బంగారం)</label>
 </div>
 
-<p class="note">
-Default prices last updated: 20 Feb 2026 (Hyderabad market). Editable.  
-(ధరలు మార్చుకోవచ్చు)
-</p>
+<div class="section-title">
+Precious Metals
+<span class="info-icon" onclick="toggleInfo('metalInfo')">*</span>
+</div>
 
-<div class="section-title">Precious Metals (బంగారం & వెండి)</div>
+<div id="metalInfo" class="tooltip">
+Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include karein.
+</div>
 
-<label>Gold (grams) – బంగారం (గ్రాములు)</label>
+<label>Gold (grams)</label>
 <input type="number" id="goldGrams">
 
-<label>Gold Price per gram (₹) – 24K – బంగారం ధర</label>
+<label>Gold Price per gram (₹)</label>
 <input type="number" id="goldPrice" value="15649">
 
-<label>Silver (grams) – వెండి (గ్రాములు)</label>
+<label>Silver (grams)</label>
 <input type="number" id="silverGrams">
 
-<label>Silver Price per gram (₹) – వెండి ధర</label>
+<label>Silver Price per gram (₹)</label>
 <input type="number" id="silverPrice" value="270">
 
-<div class="section-title">Other Assets (ఇతర ఆస్తులు)</div>
+<div class="section-title">
+Other Assets
+<span class="info-icon" onclick="toggleInfo('assetInfo')">*</span>
+</div>
 
-<label>Cash in Hand (₹) – చేతిలో నగదు</label>
+<div id="assetInfo" class="tooltip">
+Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab include karein.
+</div>
+
+<label>Cash in Hand (₹)</label>
 <input type="number" id="cash">
 
-<label>Bank Balance (₹) – బ్యాంకు నిల్వ</label>
+<label>Bank Balance (₹)</label>
 <input type="number" id="bank">
 
-<label>Business Assets (₹) – వ్యాపార ఆస్తులు</label>
+<label>Business Assets (₹)</label>
 <input type="number" id="business">
 
-<label>Receivables / Investments (₹) – రావలసిన డబ్బు / పెట్టుబడులు</label>
+<label>Receivables / Investments (₹)</label>
 <input type="number" id="otherAssets">
 
-<div class="section-title">Liabilities (బాకీలు)</div>
+<div class="section-title">
+Liabilities
+<span class="info-icon" onclick="toggleInfo('liabilityInfo')">*</span>
+</div>
 
-<label>Total Liabilities (₹) – మొత్తం బాకీలు</label>
+<div id="liabilityInfo" class="tooltip">
+Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus karein.
+</div>
+
+<label>Total Liabilities (₹)</label>
 <input type="number" id="liability">
 
 <div class="result" id="result"></div>
 
-<button class="button" onclick="downloadPDF()">Download PDF (పిడిఎఫ్ డౌన్‌లోడ్)</button>
+<button class="button" onclick="downloadPDF()">Download PDF</button>
 
 <div class="contact">
 
-<b>Masail Contact (మసాయిల్ సంప్రదించండి):</b><br>
-<a href="https://wa.me/919502255318" target="_blank">
-📲 Qazi & Mufti Shaik Asif Ali Saab (WhatsApp)
-</a>
+<b>Support Madarsa:</b><br>
+UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
-<br><br>
+<img src="donation-qr.png" class="qr">
 
-<b>Other Queries (ఇతర ప్రశ్నలు):</b><br>
-<a href="tel:+919951100334">📞 +91 99511 00334</a>
-
-<br><br>
-<hr>
-
-<b>Support Madarsa (మదర్సా సహాయం):</b><br>
-UPI ID: <b>abiddesiredlife@oksbi</b>
-<br>
-<button class="button" onclick="copyUPI()">Copy UPI ID</button>
-<br><br>
-<a href="upi://pay?pa=abiddesiredlife@oksbi&pn=Madarsa%20Donation&cu=INR">
-<button class="button">Pay via UPI App (UPI ద్వారా చెల్లించండి)</button>
+<a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Madarsa%20Donation&cu=INR">
+<button class="button">Pay via UPI</button>
 </a>
 
 </div>
@@ -135,6 +146,11 @@ UPI ID: <b>abiddesiredlife@oksbi</b>
 </div>
 
 <script>
+
+function toggleInfo(id){
+let el=document.getElementById(id);
+el.style.display=el.style.display==="block"?"none":"block";
+}
 
 function formatINR(num){
 return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -151,9 +167,7 @@ let bus=parseFloat(business.value)||0;
 let oth=parseFloat(otherAssets.value)||0;
 let liab=parseFloat(liability.value)||0;
 
-let goldVal=gG*gP;
-let silverVal=sG*sP;
-let total=goldVal+silverVal+cashV+bankV+bus+oth;
+let total=(gG*gP)+(sG*sP)+cashV+bankV+bus+oth;
 let net=total-liab;
 
 let nisabType=document.querySelector('input[name="nisab"]:checked').value;
@@ -162,20 +176,10 @@ let nisab=nisabType==="gold"?87.48*gP:612.36*sP;
 if(total===0&&liab===0){result.innerHTML="";return;}
 
 if(net<nisab){
-result.innerHTML=
-"Total Assets (మొత్తం ఆస్తులు): ₹"+formatINR(total)+
-"<br>Total Liabilities (మొత్తం బాకీలు): ₹"+formatINR(liab)+
-"<br>Net Zakatable Wealth (జకాత్‌కు అర్హమైన మొత్తం): ₹"+formatINR(net)+
-"<br>Nisab Threshold (నిసాబ్ పరిమితి): ₹"+formatINR(nisab)+
-"<br><br>Zakat is NOT obligatory (జకాత్ తప్పనిసరి కాదు)";
+result.innerHTML="Net Wealth: ₹"+formatINR(net)+"<br>Zakat Not Obligatory";
 }else{
 let zakat=net*0.025;
-result.innerHTML=
-"Total Assets (మొత్తం ఆస్తులు): ₹"+formatINR(total)+
-"<br>Total Liabilities (మొత్తం బాకీలు): ₹"+formatINR(liab)+
-"<br>Net Zakatable Wealth (జకాత్‌కు అర్హమైన మొత్తం): ₹"+formatINR(net)+
-"<br>Nisab Threshold (నిసాబ్ పరిమితి): ₹"+formatINR(nisab)+
-"<br><br>Zakat Due (చెల్లించవలసిన జకాత్ 2.5%): ₹"+formatINR(zakat);
+result.innerHTML="Net Wealth: ₹"+formatINR(net)+"<br>Zakat Due (2.5%): ₹"+formatINR(zakat);
 }
 }
 
@@ -185,44 +189,45 @@ document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("
 async function showHijri(){
 try{
 const today=new Date();
-const day=today.getDate();
-const month=today.getMonth()+1;
-const year=today.getFullYear();
-
-const response=await fetch(
-`https://api.aladhan.com/v1/gToH?date=${day}-${month}-${year}`
-);
-
+const response=await fetch(`https://api.aladhan.com/v1/gToH?date=${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`);
 const data=await response.json();
 const h=data.data.hijri;
-
 document.getElementById("hijriDate").innerText =
-"Hijri Date (Global Calculation): " + h.day + " " + h.month.en + " " + h.year + " AH";
-
-}catch(e){
-document.getElementById("hijriDate").innerText="";
-}
+"Hijri Date (Global): "+h.day+" "+h.month.en+" "+h.year+" AH";
+}catch(e){}
 }
 showHijri();
 
 function downloadPDF(){
 const { jsPDF }=window.jspdf;
 let doc=new jsPDF();
+
+let name=document.getElementById("userName").value;
+let today=new Date();
+let dateStr=today.toLocaleDateString("en-IN");
+
 doc.setFontSize(16);
 doc.text("Zakat Calculation Report",20,20);
+
 doc.setFontSize(12);
+let y=35;
+
+if(name){
+doc.text("Name: "+name,20,y);
+y+=8;
+}
+
+doc.text("Calculation Date: "+dateStr,20,y);
+y+=12;
+
 let lines=result.innerText.split("\n");
-let y=40;
+
 lines.forEach(line=>{
 doc.text(line.trim(),20,y);
 y+=8;
 });
-doc.save("Zakat_Report.pdf");
-}
 
-function copyUPI(){
-navigator.clipboard.writeText("abiddesiredlife@oksbi");
-alert("UPI ID copied successfully.");
+doc.save("Zakat_Report.pdf");
 }
 
 </script>
