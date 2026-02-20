@@ -37,17 +37,13 @@ background:#d4af37;border:none;border-radius:6px;
 cursor:pointer;font-weight:bold;
 }
 .footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
-.tooltip{
-display:none;background:#fff8e1;padding:10px;border-radius:6px;
-margin-bottom:10px;font-size:13px;border:1px solid #e0c97f;
-}
-.info-icon{color:red;cursor:pointer;margin-left:5px;font-weight:bold;}
 .qr{width:230px;display:block;margin:15px auto;}
 .small{font-size:12px;color:#777;text-align:center;margin-bottom:10px;}
 .history-box{
 margin-top:15px;background:#eef3f7;padding:10px;border-radius:6px;
 font-size:13px;
 }
+hr{border:none;border-top:1px solid #ddd;margin:20px 0;}
 </style>
 </head>
 
@@ -72,14 +68,7 @@ font-size:13px;
 <label><input type="radio" name="nisab" value="gold"> Gold Nisab (బంగారం)</label>
 </div>
 
-<div class="section-title">
-Precious Metals (బంగారం & వెండి)
-<span class="info-icon" onclick="toggleInfo('metalInfo')">*</span>
-</div>
-
-<div id="metalInfo" class="tooltip">
-Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include karein.
-</div>
+<h3>Precious Metals (బంగారం & వెండి)</h3>
 
 <label>Gold (grams)</label>
 <input type="number" id="goldGrams">
@@ -93,14 +82,7 @@ Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include 
 <label>Silver Price per gram (₹)</label>
 <input type="number" id="silverPrice">
 
-<div class="section-title">
-Other Assets (ఇతర ఆస్తులు)
-<span class="info-icon" onclick="toggleInfo('assetInfo')">*</span>
-</div>
-
-<div id="assetInfo" class="tooltip">
-Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab include karein.
-</div>
+<h3>Other Assets (ఇతర ఆస్తులు)</h3>
 
 <label>Cash in Hand (₹)</label>
 <input type="number" id="cash">
@@ -114,14 +96,7 @@ Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab inc
 <label>Receivables / Investments (₹)</label>
 <input type="number" id="otherAssets">
 
-<div class="section-title">
-Liabilities (బాకీలు)
-<span class="info-icon" onclick="toggleInfo('liabilityInfo')">*</span>
-</div>
-
-<div id="liabilityInfo" class="tooltip">
-Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus karein.
-</div>
+<h3>Liabilities (బాకీలు)</h3>
 
 <label>Total Liabilities (₹)</label>
 <input type="number" id="liability">
@@ -131,6 +106,15 @@ Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus kar
 <button class="button" onclick="downloadPDF()">Download PDF</button>
 
 <div class="history-box" id="historyBox"></div>
+
+<hr>
+
+<h3>About Madarsa</h3>
+Madarsa Salihaat Lilbanaat Khammam.<br>
+20+ ladkiyan Nazira Quran mukammal kar chuki hain.<br>
+2 ladkiyan 20 para hifz mukammal kar chuki hain.<br>
+6 bachiyon ne tailoring training complete ki.<br>
+Deeni taleem ke sath bunyadi school education bhi di ja rahi hai.
 
 <hr>
 
@@ -151,26 +135,56 @@ UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
 <script>
 
-function toggleInfo(id){
-let el=document.getElementById(id);
-el.style.display=el.style.display==="block"?"none":"block";
-}
-
 function formatINR(num){
 return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-function animateValue(element,start,end,duration){
-let startTime=null;
-function step(currentTime){
-if(!startTime) startTime=currentTime;
-let progress=Math.min((currentTime-startTime)/duration,1);
-element.innerText=formatINR(start+(end-start)*progress);
-if(progress<1) requestAnimationFrame(step);
-}
-requestAnimationFrame(step);
-}
+/* ---- ACCURATE HIJRI CALCULATION ---- */
+function showHijri() {
 
+    const today = new Date();
+    const jd = Math.floor((today / 86400000) + 2440587.5);
+
+    const l = jd - 1948440 + 10632;
+    const n = Math.floor((l - 1) / 10631);
+    let ll = l - 10631 * n + 354;
+    const j = (Math.floor((10985 - ll) / 5316)) *
+              (Math.floor((50 * ll) / 17719)) +
+              (Math.floor(ll / 5670)) *
+              (Math.floor((43 * ll) / 15238));
+    ll = ll - (Math.floor((30 - j) / 15)) *
+         (Math.floor((17719 * j) / 50)) -
+         (Math.floor(j / 16)) *
+         (Math.floor((15238 * j) / 43)) + 29;
+
+    const month = Math.floor((24 * ll) / 709);
+    const day = ll - Math.floor((709 * month) / 24);
+    const year = 30 * n + j - 30;
+
+    const months = [
+        "Muharram","Safar","Rabi al-Awwal","Rabi al-Thani",
+        "Jumada al-Awwal","Jumada al-Thani",
+        "Rajab","Sha'ban","Ramadan",
+        "Shawwal","Dhul-Qadah","Dhul-Hijjah"
+    ];
+
+    document.getElementById("hijriDate").innerText =
+        "Hijri Date (Calculated – Global): " +
+        day + " " + months[month - 1] + " " + year + " AH";
+}
+showHijri();
+
+/* ---- LOAD RATES ---- */
+async function loadRates(){
+let response=await fetch("rates.json");
+let data=await response.json();
+goldPrice.value=data.gold;
+silverPrice.value=data.silver;
+document.getElementById("rateInfo").innerText="Rates last updated: "+data.lastUpdated;
+}
+window.onload=loadRates;
+
+/* ---- CALCULATION ---- */
 function calculateZakat(){
 let gG=parseFloat(goldGrams.value)||0;
 let gP=parseFloat(goldPrice.value)||0;
@@ -190,10 +204,7 @@ let net=totalAssets-liab;
 let nisabType=document.querySelector('input[name="nisab"]:checked').value;
 let nisab=nisabType==="gold"?87.48*gP:612.36*sP;
 
-if(totalAssets===0&&liab===0){
-result.innerText="";
-return;
-}
+if(totalAssets===0 && liab===0){result.innerText="";return;}
 
 let output=
 "Total Assets: ₹"+formatINR(totalAssets)+"\n"+
@@ -205,11 +216,8 @@ if(net<nisab){
 output+="Zakat is NOT obligatory.";
 }else{
 let zakat=net*0.025;
-output+="Zakat Due (2.5%): ₹";
-result.innerText=output;
-animateValue(result,zakat,zakat,1000);
+output+="Zakat Due (2.5%): ₹"+formatINR(zakat);
 saveHistory(zakat);
-return;
 }
 
 result.innerText=output;
@@ -218,46 +226,7 @@ result.innerText=output;
 document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculateZakat));
 document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("change",calculateZakat));
 
-function showHijri(){
-const today=new Date();
-const formatter=new Intl.DateTimeFormat('en-TN-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});
-let hijri=formatter.format(today).replace("BC","");
-document.getElementById("hijriDate").innerText=
-"Hijri Date (Calculated – Global): "+hijri+" AH";
-}
-showHijri();
-
-async function loadRates(){
-let response=await fetch("rates.json");
-let data=await response.json();
-goldPrice.value=data.gold;
-silverPrice.value=data.silver;
-document.getElementById("rateInfo").innerText="Rates last updated: "+data.lastUpdated;
-}
-window.onload=loadRates;
-
-function downloadPDF(){
-const { jsPDF }=window.jspdf;
-let doc=new jsPDF();
-let name=userName.value;
-let today=new Date().toLocaleDateString("en-IN");
-
-doc.setFontSize(16);
-doc.text("Zakat Calculation Report",20,20);
-doc.setFontSize(12);
-
-let y=35;
-if(name){doc.text("Name: "+name,20,y);y+=8;}
-doc.text("Date: "+today,20,y);y+=10;
-
-result.innerText.split("\n").forEach(line=>{
-doc.text(line.trim(),20,y);
-y+=8;
-});
-
-doc.save("Zakat_Report.pdf");
-}
-
+/* ---- YEARLY SAVE ---- */
 function saveHistory(amount){
 let history=JSON.parse(localStorage.getItem("zakatHistory")||"[]");
 history.push({
@@ -278,6 +247,29 @@ html+=h.date+" → ₹"+formatINR(h.amount)+"<br>";
 document.getElementById("historyBox").innerHTML=html;
 }
 displayHistory();
+
+/* ---- PDF ---- */
+function downloadPDF(){
+const { jsPDF }=window.jspdf;
+let doc=new jsPDF();
+let name=userName.value;
+let today=new Date().toLocaleDateString("en-IN");
+
+doc.setFontSize(16);
+doc.text("Zakat Calculation Report",20,20);
+
+doc.setFontSize(12);
+let y=35;
+if(name){doc.text("Name: "+name,20,y);y+=8;}
+doc.text("Date: "+today,20,y);y+=10;
+
+result.innerText.split("\n").forEach(line=>{
+doc.text(line.trim(),20,y);
+y+=8;
+});
+
+doc.save("Zakat_Report.pdf");
+}
 
 </script>
 
