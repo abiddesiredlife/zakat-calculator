@@ -6,78 +6,48 @@
 <title>Free Zakat Calculator</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
-
+body { margin:0; font-family: Arial, sans-serif; background:#f4f4f4; }
 .hero {
-  height: 45vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  display: flex; align-items: center; justify-content: center; text-align: center;
+  height:45vh;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex; align-items:center; justify-content:center; text-align:center;
 }
-
-.ayah {
-  color: #d4af37;
-  font-family: 'Amiri', serif;
-  font-size: 28px;
-  padding: 20px;
-}
-
+.ayah { color:#d4af37; font-family:'Amiri',serif; font-size:28px; padding:20px; }
 .container {
-  padding: 20px;
-  max-width: 650px;
-  margin: -40px auto 40px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  padding:20px;
+  max-width:650px;
+  margin:-40px auto 40px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
-
-h2 { text-align: center; }
-
-.section-title {
-  margin-top: 20px;
-  font-weight: bold;
+h2{text-align:center;}
+.section-title{margin-top:20px;font-weight:bold;}
+label{font-size:14px;font-weight:bold;}
+input{
+  width:100%;padding:10px;margin:6px 0 12px;
+  border-radius:6px;border:1px solid #ccc;
 }
-
-label {
-  font-size: 14px;
-  font-weight: bold;
+.radio-group{display:flex;justify-content:center;gap:20px;margin-bottom:10px;}
+.note{font-size:12px;color:#555;margin-bottom:10px;}
+.result{
+  margin-top:20px;padding:15px;
+  background:#f0f0f0;border-radius:6px;font-weight:bold;
 }
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.button{
+  width:100%;padding:12px;margin-top:10px;
+  background:#d4af37;border:none;border-radius:6px;
+  cursor:pointer;font-weight:bold;
 }
-
-.radio-group {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 15px;
+.footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
+.contact{
+  margin-top:20px;padding:10px;background:#fafafa;border-radius:6px;
 }
-
-.note {
-  font-size: 12px;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-.result {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f0f0f0;
-  border-radius: 6px;
-  font-weight: bold;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #777;
+.lang-toggle{
+  text-align:right;font-size:14px;cursor:pointer;color:#2c5364;
 }
 </style>
 </head>
@@ -85,23 +55,23 @@ input {
 <body>
 
 <div class="hero">
-  <div class="ayah">
-    وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ
-  </div>
+  <div class="ayah">وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ</div>
 </div>
 
 <div class="container">
 
-<h2>Free Zakat Calculator</h2>
+<div class="lang-toggle" onclick="toggleLang()">اردو / English</div>
+
+<h2 id="title">Free Zakat Calculator</h2>
+
+<div id="hijriDate" style="text-align:center;font-size:14px;margin-bottom:10px;"></div>
 
 <div class="radio-group">
-  <label><input type="radio" name="nisab" value="silver" checked> Silver Nisab</label>
-  <label><input type="radio" name="nisab" value="gold"> Gold Nisab</label>
+<label><input type="radio" name="nisab" value="silver" checked> Silver Nisab</label>
+<label><input type="radio" name="nisab" value="gold"> Gold Nisab</label>
 </div>
 
-<p class="note">
-Default prices last updated: 20 Feb 2026 (Hyderabad market). You may edit as per your local rate.
-</p>
+<p class="note">Default prices last updated: 20 Feb 2026 (Hyderabad market). Editable.</p>
 
 <div class="section-title">Precious Metals</div>
 
@@ -131,86 +101,102 @@ Default prices last updated: 20 Feb 2026 (Hyderabad market). You may edit as per
 <label>Receivables / Investments (₹)</label>
 <input type="number" id="otherAssets">
 
-<div class="section-title">Liabilities (Current Due Only)</div>
+<div class="section-title">Liabilities</div>
 
 <label>Total Liabilities (₹)</label>
 <input type="number" id="liability">
 
 <div class="result" id="result"></div>
 
-<div class="footer">
-Powered by Noon Enterprises
+<button class="button" onclick="downloadPDF()">Download PDF</button>
+
+<div class="contact">
+<b>Masail Contact:</b><br>
+<a href="https://wa.me/919502255318" target="_blank">
+📲 Qazi & Mufti Shaik Asif Ali Saab (WhatsApp)
+</a>
+<br><br>
+<b>Any Other Queries:</b><br>
+<a href="tel:+919951100334">📞 +91 99511 00334</a>
 </div>
+
+<div class="footer">Powered by Noon Enterprises</div>
 
 </div>
 
 <script>
-
-function formatINR(num) {
-  return num.toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+function formatINR(num){
+return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-function calculateZakat() {
+function calculateZakat(){
+let gG=parseFloat(goldGrams.value)||0;
+let gP=parseFloat(goldPrice.value)||0;
+let sG=parseFloat(silverGrams.value)||0;
+let sP=parseFloat(silverPrice.value)||0;
+let cashV=parseFloat(cash.value)||0;
+let bankV=parseFloat(bank.value)||0;
+let bus=parseFloat(business.value)||0;
+let oth=parseFloat(otherAssets.value)||0;
+let liab=parseFloat(liability.value)||0;
 
-  let goldGrams = parseFloat(document.getElementById("goldGrams").value) || 0;
-  let goldPrice = parseFloat(document.getElementById("goldPrice").value) || 0;
-  let silverGrams = parseFloat(document.getElementById("silverGrams").value) || 0;
-  let silverPrice = parseFloat(document.getElementById("silverPrice").value) || 0;
+let goldVal=gG*gP;
+let silverVal=sG*sP;
+let total=goldVal+silverVal+cashV+bankV+bus+oth;
+let net=total-liab;
 
-  let cash = parseFloat(document.getElementById("cash").value) || 0;
-  let bank = parseFloat(document.getElementById("bank").value) || 0;
-  let business = parseFloat(document.getElementById("business").value) || 0;
-  let otherAssets = parseFloat(document.getElementById("otherAssets").value) || 0;
-  let liability = parseFloat(document.getElementById("liability").value) || 0;
+let nisabType=document.querySelector('input[name="nisab"]:checked').value;
+let nisab=nisabType==="gold"?87.48*gP:612.36*sP;
 
-  let goldValue = goldGrams * goldPrice;
-  let silverValue = silverGrams * silverPrice;
+if(total===0&&liab===0){result.innerHTML="";return;}
 
-  let totalAssets = goldValue + silverValue + cash + bank + business + otherAssets;
-  let netWealth = totalAssets - liability;
-
-  let nisabType = document.querySelector('input[name="nisab"]:checked').value;
-
-  let nisabValue = nisabType === "gold"
-      ? 87.48 * goldPrice
-      : 612.36 * silverPrice;
-
-  let resultDiv = document.getElementById("result");
-
-  if (totalAssets === 0 && liability === 0) {
-    resultDiv.innerHTML = "";
-    return;
-  }
-
-  if (netWealth < nisabValue) {
-    resultDiv.innerHTML =
-      "Total Assets: ₹" + formatINR(totalAssets) +
-      "<br>Total Liabilities: ₹" + formatINR(liability) +
-      "<br>Net Zakatable Wealth: ₹" + formatINR(netWealth) +
-      "<br>Nisab Threshold: ₹" + formatINR(nisabValue) +
-      "<br><br>Zakat is NOT obligatory.";
-  } else {
-    let zakat = netWealth * 0.025;
-    resultDiv.innerHTML =
-      "Total Assets: ₹" + formatINR(totalAssets) +
-      "<br>Total Liabilities: ₹" + formatINR(liability) +
-      "<br>Net Zakatable Wealth: ₹" + formatINR(netWealth) +
-      "<br>Nisab Threshold: ₹" + formatINR(nisabValue) +
-      "<br><br>Zakat Due (2.5%): ₹" + formatINR(zakat);
-  }
+if(net<nisab){
+result.innerHTML=
+"Total Assets: ₹"+formatINR(total)+
+"<br>Total Liabilities: ₹"+formatINR(liab)+
+"<br>Net Zakatable Wealth: ₹"+formatINR(net)+
+"<br>Nisab Threshold: ₹"+formatINR(nisab)+
+"<br><br>Zakat is NOT obligatory.";
+}else{
+let zakat=net*0.025;
+result.innerHTML=
+"Total Assets: ₹"+formatINR(total)+
+"<br>Total Liabilities: ₹"+formatINR(liab)+
+"<br>Net Zakatable Wealth: ₹"+formatINR(net)+
+"<br>Nisab Threshold: ₹"+formatINR(nisab)+
+"<br><br>Zakat Due (2.5%): ₹"+formatINR(zakat);
+}
 }
 
-document.querySelectorAll("input").forEach(input => {
-  input.addEventListener("input", calculateZakat);
-});
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculateZakat));
+document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("change",calculateZakat));
 
-document.querySelectorAll('input[name="nisab"]').forEach(radio => {
-  radio.addEventListener("change", calculateZakat);
-});
+function downloadPDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+doc.text("Zakat Calculation Report",20,20);
+doc.text(result.innerText,20,40);
+doc.save("Zakat_Report.pdf");
+}
 
+function showHijri(){
+let today=new Date();
+let hijri=new Intl.DateTimeFormat('en-TN-u-ca-islamic',{
+day:'numeric',month:'long',year:'numeric'
+}).format(today);
+document.getElementById("hijriDate").innerText="Hijri Date: "+hijri;
+}
+showHijri();
+
+let urdu=false;
+function toggleLang(){
+urdu=!urdu;
+if(urdu){
+document.getElementById("title").innerText="زکوٰۃ کیلکولیٹر";
+}else{
+document.getElementById("title").innerText="Free Zakat Calculator";
+}
+}
 </script>
 
 </body>
