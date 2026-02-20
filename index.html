@@ -119,9 +119,13 @@ hr{border:none;border-top:1px solid #ddd;}
 <hr>
 
 <b>Support Madarsa (Donation):</b><br>
-UPI ID: <b>muftiasifali94@okhdfcbank</b>
+UPI ID: <b>abiddesiredlife@oksbi</b>
 <br>
 <button class="button" onclick="copyUPI()">Copy UPI ID</button>
+<br><br>
+<a href="upi://pay?pa=abiddesiredlife@oksbi&pn=Madarsa%20Donation&cu=INR">
+<button class="button">Pay via UPI App</button>
+</a>
 
 </div>
 
@@ -179,11 +183,24 @@ document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("
 
 async function showHijri(){
 try{
-const response=await fetch("https://api.aladhan.com/v1/gToH");
+const today=new Date();
+const day=today.getDate();
+const month=today.getMonth()+1;
+const year=today.getFullYear();
+
+const response=await fetch(
+`https://api.aladhan.com/v1/gToH?date=${day}-${month}-${year}&adjustment=1`
+);
+
 const data=await response.json();
 const h=data.data.hijri;
-hijriDate.innerText="Hijri Date: "+h.day+" "+h.month.en+" "+h.year+" AH";
-}catch(e){hijriDate.innerText="";}
+
+document.getElementById("hijriDate").innerText =
+"Hijri Date: " + h.day + " " + h.month.en + " " + h.year + " AH";
+
+}catch(e){
+document.getElementById("hijriDate").innerText="";
+}
 }
 showHijri();
 
@@ -203,7 +220,7 @@ doc.save("Zakat_Report.pdf");
 }
 
 function copyUPI(){
-navigator.clipboard.writeText("muftiasifali94@okhdfcbank");
+navigator.clipboard.writeText("abiddesiredlife@oksbi");
 alert("UPI ID copied successfully.");
 }
 
