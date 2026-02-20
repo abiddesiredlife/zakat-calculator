@@ -70,7 +70,7 @@ hr{border:none;border-top:1px solid #ddd;}
 </div>
 
 <div class="section-title">
-Precious Metals
+Precious Metals (బంగారం & వెండి)
 <span class="info-icon" onclick="toggleInfo('metalInfo')">*</span>
 </div>
 
@@ -91,7 +91,7 @@ Sona chandi chahe pehne huye ho, investment ho, ya amanat me ho — sab include 
 <input type="number" id="silverPrice">
 
 <div class="section-title">
-Other Assets
+Other Assets (ఇతర ఆస్తులు)
 <span class="info-icon" onclick="toggleInfo('assetInfo')">*</span>
 </div>
 
@@ -112,7 +112,7 @@ Cash, bank balance, udhar diya paisa, business maal, shares, advance — sab inc
 <input type="number" id="otherAssets">
 
 <div class="section-title">
-Liabilities
+Liabilities (బాకీలు)
 <span class="info-icon" onclick="toggleInfo('liabilityInfo')">*</span>
 </div>
 
@@ -130,7 +130,7 @@ Loan, EMI, maher, rent, salary, tax, bills — sirf current due amount minus kar
 <hr>
 
 <div class="section-title">
-About Madarsa
+About Madarsa (మదరసా వివరాలు)
 <span class="info-icon" onclick="toggleInfo('madarsaInfo')">*</span>
 </div>
 
@@ -139,8 +139,7 @@ Madarsa Salihaat Lilbanaat Khammam.<br>
 20+ ladkiyan Nazira Quran mukammal kar chuki hain.<br>
 2 ladkiyan 20 para hifz mukammal kar chuki hain.<br>
 6 bachiyon ne tailoring training complete ki.<br>
-Deeni taleem ke sath bunyadi school education bhi di ja rahi hai.<br>
-Aap apni Zakat, Sadaqa, Fitra ke zariye madarse ka taawun kar sakte hain.
+Deeni taleem ke sath bunyadi school education bhi di ja rahi hai.
 </div>
 
 <hr>
@@ -149,6 +148,10 @@ Aap apni Zakat, Sadaqa, Fitra ke zariye madarse ka taawun kar sakte hain.
 UPI ID: <b>muftiasifali94@okhdfcbank</b>
 
 <img src="donation-qr.png" class="qr">
+
+<a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Madarsa%20Donation&cu=INR">
+<button class="button">Pay via UPI</button>
+</a>
 
 <hr>
 
@@ -211,17 +214,14 @@ document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calcula
 document.querySelectorAll('input[name="nisab"]').forEach(r=>r.addEventListener("change",calculateZakat));
 
 function showHijri(){
-try{
 const today=new Date();
-const hijri=today.toLocaleDateString('en-TN-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});
+const hijri=today.toLocaleDateString('en-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'});
 document.getElementById("hijriDate").innerText =
-"Hijri Date (Calculated – Global): "+hijri+" AH";
-}catch(e){}
+"Hijri Date (Calculated – Global): "+hijri;
 }
 showHijri();
 
 async function loadRates(){
-try{
 let response=await fetch("rates.json");
 let data=await response.json();
 goldPrice.value=data.gold;
@@ -229,9 +229,6 @@ silverPrice.value=data.silver;
 document.getElementById("rateInfo").innerText =
 "Rates last updated: "+data.lastUpdated;
 calculateZakat();
-}catch(e){
-document.getElementById("rateInfo").innerText="Unable to load live rates.";
-}
 }
 window.onload=loadRates;
 
