@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 body{margin:0;font-family:Arial;background:#f4f4f4;}
@@ -21,29 +21,11 @@ input{width:100%;padding:8px;margin:6px 0 12px;border-radius:6px;border:1px soli
 .section-title{margin-top:25px;font-size:18px;font-weight:bold;}
 .result-box{background:#f0f0f0;padding:12px;border-radius:6px;margin-top:10px;white-space:pre-line;font-weight:bold;}
 .summary{margin-top:20px;padding:15px;background:#e8f1f7;border-radius:8px;font-weight:bold;}
-details{margin-bottom:10px;background:#fafafa;padding:10px;border-radius:6px;}
+.nisab-box{margin-top:15px;padding:15px;background:#fff3cd;color:#856404;border-radius:8px;font-weight:bold;}
 .button{width:100%;padding:10px;background:#d4af37;border:none;border-radius:6px;cursor:pointer;font-weight:bold;margin-top:10px;}
 .small{text-align:center;font-size:12px;color:#777;}
 .footer{text-align:center;margin-top:15px;font-size:12px;color:#777;}
 hr{margin:25px 0;}
-/* Highlight for TOTAL ZAKAT PAYABLE on page */
-#finalSummary .highlight-zakat {
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 12px;
-  border: 3px solid #d4af37;
-  background: linear-gradient(135deg, #fffde7, #fff8e1);
-  box-shadow: 0 4px 15px rgba(212,175,55,0.4);
-}
-#finalSummary .highlight-zakat .amount {
-  color: #c62828; /* red if due */
-}
-#finalSummary .highlight-zakat.zero .amount {
-  color: #2e7d32; /* green if zero */
-}
 </style>
 </head>
 
@@ -65,13 +47,6 @@ hr{margin:25px 0;}
 
 <label>Gold (grams)</label>
 <input type="number" id="goldGrams">
-
-<label>Gold Purity</label>
-<select id="goldPurity">
-  <option value="1">24K / Pure</option>
-  <option value="0.916">22K</option>
-  <option value="0.75">18K</option>
-</select>
 
 <label>Gold Price</label>
 <input type="number" id="goldPrice" value="15649">
@@ -182,7 +157,7 @@ showHijri();
 
 function calculate(){
 
-let goldVal=(+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1);
+let goldVal=(+goldGrams.value||0)*(+goldPrice.value||0);
 let silverVal=(+silverGrams.value||0)*(+silverPrice.value||0);
 
 let personalAssets=
@@ -224,10 +199,8 @@ businessResult.innerText=
 
 let totalZakat=personalZakat+bizZakat;
 
-finalSummary.innerHTML=
-`<div class="highlight-zakat">
-  TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}
-</div>`;
+finalSummary.innerText=
+"TOTAL ZAKAT PAYABLE: ₹"+formatINR(totalZakat);
 
 let nisabSilver = 612.36 * (+silverPrice.value || 270);
 let nisabGold   = 87.48 * (+goldPrice.value || 15649);
@@ -241,7 +214,7 @@ nisabInfo.innerText=
   "Below Nisab → No Zakat due currently.");
 }
 
-document.querySelectorAll("input, select").forEach(i=>i.addEventListener("input",calculate));
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate));
 
 function downloadPDF(){
   const { jsPDF } = window.jspdf;
@@ -264,70 +237,10 @@ function downloadPDF(){
 
   doc.setFontSize(14);
   doc.setTextColor(220, 53, 69);
-  doc.setFontSize(16);
-  doc.text("TOTAL ZAKAT PAYABLE: ₹"+formatINR(totalZakat),105,y,{align:"center"});
-  y+=15;
-
-  doc.setFontSize(12);
-  doc.text("Personal Section",20,y);
-  y+=8;
-
-  doc.autoTable({
-    startY: y,
-    head: [['Item', 'Value (₹)']],
-    body: [
-      ['Gold Value', formatINR((+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1))],
-      ['Silver Value', formatINR((+silverGrams.value||0)*(+silverPrice.value||0))],
-      ['Cash', formatINR(+personalCash.value||0)],
-      ['Bank Balance', formatINR(+personalBank.value||0)],
-      ['Receivables', formatINR(+personalReceivables.value||0)],
-      ['Investments / Shares', formatINR(+personalInvestments.value||0)],
-      ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
-      ['Other Liquid Wealth', formatINR(+personalOther.value||0)],
-      ['Total Personal Assets', formatINR(personalAssets)],
-      ['Personal Liabilities', formatINR(personalLiab)],
-      ['Personal Net', formatINR(personalNet)],
-      ['Zakat (2.5%)', formatINR(personalZakat)]
-    ],
-    margin: {left: 20},
-    theme: 'grid'
-  });
-  y = doc.lastAutoTable.finalY + 10;
-
-  doc.setFontSize(12);
-  doc.text("Business Section",20,y);
-  y+=8;
-
-  doc.autoTable({
-    startY: y,
-    head: [['Item', 'Value (₹)']],
-    body: [
-      ['Closing Stock', formatINR(+stock.value||0)],
-      ['Raw Material', formatINR(+raw.value||0)],
-      ['Finished Goods', formatINR(+finished.value||0)],
-      ['Business Cash', formatINR(+bizCash.value||0)],
-      ['Business Bank', formatINR(+bizBank.value||0)],
-      ['Customer Receivables', formatINR(+bizReceivables.value||0)],
-      ['Total Business Assets', formatINR(bizAssets)],
-      ['Business Liabilities', formatINR(bizLiab)],
-      ['Business Net', formatINR(bizNet)],
-      ['Zakat (2.5%)', formatINR(bizZakat)]
-    ],
-    margin: {left: 20},
-    theme: 'grid'
-  });
-  y = doc.lastAutoTable.finalY + 10;
-
-  doc.setFontSize(12);
-  doc.text("Nisab Information",20,y);
-  y+=8;
-  let nisabLines = document.getElementById("nisabInfo").innerText.split("\n");
-  nisabLines.forEach(line => { doc.text(line,20,y); y+=7; });
+  doc.text(finalSummary.innerText,105,y,{align:"center"});
 
   doc.save("Zakat_Report.pdf");
 }
-
-document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate));
 
 window.onload = function() {
   calculate();
