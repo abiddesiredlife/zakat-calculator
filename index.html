@@ -11,334 +11,323 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-body {margin:0; font-family:Arial, sans-serif; background:#f4f4f4;}
-.hero {height:32vh; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); display:flex; align-items:center; justify-content:center; text-align:center;}
-.ayah {color:#d4af37; font-family:'Amiri',serif; font-size:26px;}
-.container {max-width:900px; margin:-40px auto 40px; background:white; padding:20px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.1);}
-h2 {text-align:center; margin-top:0;}
-label {font-weight:bold; display:block; margin-top:8px;}
-input, select {width:100%; padding:8px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;}
-.section-title {margin:25px 0 10px; font-size:18px; font-weight:bold; background:#f8f9fa; padding:8px; border-radius:6px;}
-.guide {font-size:0.85em; color:#555; margin:4px 0 12px;}
-.result-box {background:#f0f0f0; padding:12px; border-radius:6px; margin-top:10px; white-space:pre-line; font-weight:bold; line-height:1.5;}
-.summary {margin-top:20px; padding:15px; background:#e8f1f7; border-radius:8px; font-weight:bold;}
-.nisab-box {margin-top:15px; padding:15px; background:#fff3cd; color:#856404; border-radius:8px; font-weight:bold;}
-.button {width:100%; padding:12px; background:#d4af37; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin:10px 0; font-size:16px;}
-.small {text-align:center; font-size:12px; color:#777; margin:10px 0;}
-.footer {text-align:center; margin:20px 0; font-size:12px; color:#777;}
-hr {margin:25px 0; border-color:#eee;}
-
-/* Highlighted TOTAL ZAKAT PAYABLE on page */
-#finalSummary .highlight-zakat {
-  font-size: 32px;
+body{margin:0;font-family:Arial;background:#f4f4f4;}
+.hero{height:32vh;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);display:flex;align-items:center;justify-content:center;text-align:center;}
+.ayah{color:#d4af37;font-family:'Amiri',serif;font-size:26px;}
+.container{max-width:900px;margin:-40px auto 40px;background:white;padding:20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+h2{text-align:center;margin-top:0;}
+label{font-weight:bold;}
+input{width:100%;padding:8px;margin:6px 0 12px;border-radius:6px;border:1px solid #ccc;}
+.section-title{margin-top:25px;font-size:18px;font-weight:bold;}
+.result-box{background:#f0f0f0;padding:12px;border-radius:6px;margin-top:10px;white-space:pre-line;font-weight:bold;}
+.summary{margin-top:20px;padding:15px;background:#e8f1f7;border-radius:8px;font-weight:bold;}
+details{margin-bottom:10px;background:#fafafa;padding:10px;border-radius:6px;}
+.button{width:100%;padding:10px;background:#d4af37;border:none;border-radius:6px;cursor:pointer;font-weight:bold;margin-top:10px;}
+.small{text-align:center;font-size:12px;color:#777;}
+.footer{text-align:center;margin-top:15px;font-size:12px;color:#777;}
+hr{margin:25px 0;}
+/* NEW: Highlight for TOTAL ZAKAT PAYABLE on page */
+#finalSummary .highlight {
+  font-size: 28px;
   font-weight: bold;
-  padding: 20px;
-  margin: 20px 0;
   text-align: center;
-  border-radius: 12px;
-  border: 3px solid #d4af37;
-  background: linear-gradient(135deg, #fffde7, #fff8e1);
-  box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 10px;
+  background: #fff3e0;
+  border: 2px solid #d4af37;
+  color: #c62828;
 }
-#finalSummary .amount {color: #c62828;}
-#finalSummary .zero .amount {color: #2e7d32;}
-#finalSummary .status {font-size: 18px; margin-top: 10px; color: #424242;}
+#finalSummary .highlight.zero {
+  color: #2e7d32;
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 10px;
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
 </style>
 </head>
+
 <body>
 
 <div class="hero">
-  <div class="ayah">وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ</div>
+<div class="ayah">وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ</div>
 </div>
 
 <div class="container">
 
-  <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
-  <div id="hijriDate" class="small"></div>
+<h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
+<div id="hijriDate" class="small"></div>
 
-  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year.</p>
+<label>Optional Name (పేరు)</label>
+<input type="text" id="userName">
 
-  <label>Optional Name (పేరు)</label>
-  <input type="text" id="userName" placeholder="Your name (optional for PDF)">
+<div class="section-title">PERSONAL (వ్యక్తిగత)</div>
 
-  <div class="section-title">PERSONAL ASSETS (వ్యక్తిగత ఆస్తులు)</div>
-  <p class="guide">Include gold, silver, cash, bank, receivables, investments etc. that are zakatable.</p>
+<label>Gold (grams)</label>
+<input type="number" id="goldGrams">
 
-  <label>Gold (grams) - బంగారం (గ్రాములు)</label>
-  <input type="number" id="goldGrams" min="0" step="any" placeholder="Total gold weight in grams (for selected purity)">
+<label>Gold Purity</label>
+<select id="goldPurity">
+  <option value="1">24K / Pure</option>
+  <option value="0.916">22K</option>
+  <option value="0.75">18K</option>
+</select>
 
-  <label>Gold Purity - బంగారం స్వచ్ఛత</label>
-  <select id="goldPurity">
-    <option value="1" data-karat="24k">24K / Pure</option>
-    <option value="0.916" data-karat="22k" selected>22K (common jewellery)</option>
-    <option value="0.75" data-karat="18k">18K</option>
-  </select>
-  <div class="guide">Changing purity auto-updates price from rates.json</div>
+<label>Gold Price</label>
+<input type="number" id="goldPrice" value="15649">
 
-  <label>Gold Price (per gram for selected purity)</label>
-  <input type="number" id="goldPrice" value="15738" step="10" readonly style="background:#f9f9f9;">
+<label>Silver (grams)</label>
+<input type="number" id="silverGrams">
 
-  <label>Silver (grams) - వెండి (గ్రాములు)</label>
-  <input type="number" id="silverGrams" min="0" step="any" placeholder="Total silver weight in grams">
+<label>Silver Price</label>
+<input type="number" id="silverPrice" value="270">
 
-  <label>Silver Price (per gram)</label>
-  <input type="number" id="silverPrice" value="270" step="1" readonly style="background:#f9f9f9;">
+<label>Cash</label>
+<input type="number" id="personalCash">
 
-  <label>Cash in Hand - నగదు (ఇంట్లో / దగ్గర)</label>
-  <input type="number" id="personalCash" min="0" step="any" placeholder="Physical cash you have">
+<label>Bank Balance</label>
+<input type="number" id="personalBank">
 
-  <label>Bank Balance / Savings - బ్యాంకు బ్యాలెన్స్</label>
-  <input type="number" id="personalBank" min="0" step="any" placeholder="All bank accounts total">
+<label>Receivables</label>
+<input type="number" id="personalReceivables">
 
-  <label>Receivables (owed to you) - ఇతరులు చెల్లించాల్సిన డబ్బు</label>
-  <input type="number" id="personalReceivables" min="0" step="any" placeholder="Loans given, pending salary etc. (recoverable)">
+<label>Investments / Shares</label>
+<input type="number" id="personalInvestments">
 
-  <label>Investments / Shares / Mutual Funds - పెట్టుబడులు / షేర్లు</label>
-  <input type="number" id="personalInvestments" min="0" step="any" placeholder="Current market value">
+<label>Crypto / Digital</label>
+<input type="number" id="personalCrypto">
 
-  <label>Crypto / Digital Assets - క్రిప్టో / డిజిటల్</label>
-  <input type="number" id="personalCrypto" min="0" step="any" placeholder="Current value (if zakatable per your madhab)">
+<label>Other Liquid Wealth</label>
+<input type="number" id="personalOther">
 
-  <label>Other Liquid Wealth - ఇతర ద్రవ ఆస్తులు</label>
-  <input type="number" id="personalOther" min="0" step="any" placeholder="Other cash-like / sellable assets">
+<label>Total Personal Liabilities (Current Only)</label>
+<input type="number" id="personalLiabilities">
 
-  <label>Total Personal Current Liabilities - ప్రస్తుత వ్యక్తిగత రుణాలు</label>
-  <input type="number" id="personalLiabilities" min="0" step="any" placeholder="Debts due soon (long-term usually excluded)">
+<div class="result-box" id="personalResult"></div>
 
-  <div class="result-box" id="personalResult"></div>
+<hr>
 
-  <hr>
+<div class="section-title">BUSINESS (వ్యాపారం)</div>
 
-  <div class="section-title">BUSINESS ASSETS (వ్యాపార ఆస్తులు)</div>
-  <p class="guide">Use current sale value (not cost). Deduct only current payables.</p>
+<label>Closing Stock (Sale Value)</label>
+<input type="number" id="stock">
 
-  <label>Closing Stock (sale value) - ముగింపు స్టాక్ (అమ్మకం విలువ)</label>
-  <input type="number" id="stock" min="0" step="any" placeholder="Market value of unsold goods">
+<label>Raw Material</label>
+<input type="number" id="raw">
 
-  <label>Raw Materials - ముడి సరుకు విలువ</label>
-  <input type="number" id="raw" min="0" step="any" placeholder="Current value of raw stock">
+<label>Finished Goods</label>
+<input type="number" id="finished">
 
-  <label>Finished Goods - పూర్తి చేసిన వస్తువుల విలువ</label>
-  <input type="number" id="finished" min="0" step="any" placeholder="Sale value of ready products">
+<label>Business Cash</label>
+<input type="number" id="bizCash">
 
-  <label>Business Cash - వ్యాపార నగదు</label>
-  <input type="number" id="bizCash" min="0" step="any" placeholder="Cash in shop/business">
+<label>Business Bank</label>
+<input type="number" id="bizBank">
 
-  <label>Business Bank Balance - వ్యాపార బ్యాంకు</label>
-  <input type="number" id="bizBank" min="0" step="any" placeholder="Business account balance">
+<label>Customer Receivables</label>
+<input type="number" id="bizReceivables">
 
-  <label>Customer Receivables - కస్టమర్ల నుండి వసూలు చేయాల్సినవి</label>
-  <input type="number" id="bizReceivables" min="0" step="any" placeholder="Amounts owed by customers">
+<label>Business Liabilities (Current Only)</label>
+<input type="number" id="bizLiabilities">
 
-  <label>Business Current Liabilities - ప్రస్తుత వ్యాపార బాధ్యతలు</label>
-  <input type="number" id="bizLiabilities" min="0" step="any" placeholder="Bills, suppliers due now">
+<div class="result-box" id="businessResult"></div>
 
-  <div class="result-box" id="businessResult"></div>
+<div class="summary" id="finalSummary"></div>
 
-  <div class="summary" id="finalSummary"></div>
+<div id="nisabInfo" class="nisab-box"></div>
 
-  <div class="nisab-box" id="nisabInfo"></div>
+<button class="button" onclick="downloadPDF()">Download Professional PDF</button>
 
-  <button class="button" onclick="downloadPDF()">Download Professional PDF Report</button>
+<hr>
 
-  <hr>
+<h3 style="text-align:center;cursor:pointer;" onclick="document.getElementById('madarsaModal').style.display='block'">Support Madarsa</h3>
+UPI: muftiasifali94@okhdfcbank
 
-  <h3 style="text-align:center; cursor:pointer; color:#d4af37;" onclick="openMadarsaModal()">Support Madarsa</h3>
-  <p style="text-align:center;">UPI: muftiasifali94@okhdfcbank</p>
-  <img src="donation-qr.png" style="width:220px; display:block; margin:15px auto;" alt="Donation QR">
+<img src="donation-qr.png" style="width:200px;display:block;margin:10px auto;">
 
-  <a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Zakat&cu=INR" style="text-decoration:none;">
-    <button class="button">Pay via UPI</button>
-  </a>
+<a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Zakat&cu=INR">
+<button class="button">Pay via UPI</button>
+</a>
 
-  <div class="footer">Powered by ن Enterprises | Prices from rates.json</div>
+<div class="footer">Powered by ن Enterprises</div>
 
 </div>
 
-<!-- Madarsa Modal Popup -->
-<div id="madarsaModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeMadarsaModal()">&times;</span>
-    <h2 style="text-align:center; color:#0f2027;">మదరసా సాలిహాత్ లిల్బనాత్ ఖమ్మం</h2>
-    <p style="text-align:center; font-weight:bold;">Appeal for Taawun 2026</p>
-    
+<!-- Madarsa Modal -->
+<div id="madarsaModal" style="display:none;position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.4);">
+  <div style="background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:500px;border-radius:10px;">
+    <span style="color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer;" onclick="document.getElementById('madarsaModal').style.display='none'">&times;</span>
+    <h2 style="text-align:center;color:#006400;">మదరసా సాలిహాత్ లిల్బనాత్ ఖమ్మం</h2>
+    <p style="text-align:center;font-weight:bold;">Appeal for Taawun 2026</p>
     <p><strong>ఒక లడ్కీ కి మంత్లీ కఫాలత్:</strong> ₹1800/-</p>
-    <p>అల్హమ్దులిల్లాహ్, మదరసా హాజా మే అబ్ తక్ 20 లడ్కియోం నే నజీరా ఖురాన్ ఔర్ దీన్ కి బున్యాదీ మలూమాత్ కా ఇల్మ్ హాసిల్ కియా.</p>
-    <p>6 బచ్చియోం నే టైలరింగ్ ముకమ్మల్ కియా. హిఫ్జ్-ఏ-ఖురాన్ ఔర్ ఆలిమియత్ జారీ హై.</p>
-    <p>ఆప్ అప్నీ జకాత్, సదకా, ఫిత్రానా, అతియా సే మదద్ ఫర్మా సక్తే హైం.</p>
-    
-    <hr style="margin:15px 0;">
-    
+    <p>అల్హమ్దులిల్లాహ్, 20 లడ్కియోం నే నజీరా ఖురాన్ ఔర్ దీన్ కి బున్యాదీ మలూమాత్ కా ఇల్మ్ హాసిల్ కియా.</p>
+    <p>6 బచ్చియోం నే టైలరింగ్ ముకమ్మల్ కియా. హిఫ్జ్ & ఆలిమియత్ జారీ హై.</p>
+    <p>ఆప్ జకాత్, సదకా, ఫిత్రా, అతియా సే మదద్ ఫర్మా సక్తే హైం.</p>
+    <hr>
     <p><strong>Bank Details:</strong></p>
     <p>Account No: 1200000485740</p>
-    <p>IFSC Code: CNRB0008484</p>
+    <p>IFSC: CNRB0008484</p>
     <p>Name: Asif Ali Sayeed Qasmi</p>
     <p>Phone: 95022 55318</p>
     <p>UPI: muftiasifali94@okhdfcbank</p>
-    
-    <p style="text-align:center; margin-top:20px; font-weight:bold;">ఆప్ హజ్రత్ మదరసే కో అప్నీ దుఆఓం మే జరూర్ శామిల్ రఖేంగే!<br>Jazakumullahu Khaira</p>
   </div>
 </div>
 
 <script>
-let rates = {
-  gold_24k: 15738,
-  gold_22k: 14426,
-  gold_18k: 11803,
-  silver: 270,
-  lastUpdated: "21 Feb 2026 (Hyderabad)"
-};
 
-let totalNetWealth = 0;
-let nisabSilver = 0;
-let nisabGold = 0;
-let totalZakat = 0;
-let statusMessage = "";
-
-function formatINR(num) {
-  return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+function formatINR(num){
+return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-function showHijri() {
-  const today = new Date();
-  const jd = Math.floor((today / 86400000) + 2440587.5);
-  const l = jd - 1948440 + 10632;
-  const n = Math.floor((l - 1) / 10631);
-  let ll = l - 10631 * n + 354;
-  const j = (Math.floor((10985 - ll) / 5316)) * (Math.floor((50 * ll) / 17719))
-          + (Math.floor(ll / 5670)) * (Math.floor((43 * ll) / 15238));
-  ll = ll - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50))
-         - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
-  const month = Math.floor((24 * ll) / 709);
-  const day = ll - Math.floor((709 * month) / 24);
-  const year = 30 * n + j - 30;
-  const months = ["Muharram","Safar","Rabi al-Awwal","Rabi al-Thani",
-                  "Jumada al-Awwal","Jumada al-Thani","Rajab","Sha'ban","Ramadan",
-                  "Shawwal","Dhul-Qadah","Dhul-Hijjah"];
-  document.getElementById("hijriDate").innerText = 
-    "Hijri Date (Global): " + day + " " + months[month - 1] + " " + year + " AH";
+function showHijri(){
+const today=new Date();
+const jd=Math.floor((today/86400000)+2440587.5);
+const l=jd-1948440+10632;
+const n=Math.floor((l-1)/10631);
+let ll=l-10631*n+354;
+const j=(Math.floor((10985-ll)/5316))*(Math.floor((50*ll)/17719))
++(Math.floor(ll/5670))*(Math.floor((43*ll)/15238));
+ll=ll-(Math.floor((30-j)/15))*(Math.floor((17719*j)/50))
+-(Math.floor(j/16))*(Math.floor((15238*j)/43))+29;
+const month=Math.floor((24*ll)/709);
+const day=ll-Math.floor((709*month)/24);
+const year=30*n+j-30;
+const months=["Muharram","Safar","Rabi al-Awwal","Rabi al-Thani",
+"Jumada al-Awwal","Jumada al-Thani","Rajab","Sha'ban","Ramadan",
+"Shawwal","Dhul-Qadah","Dhul-Hijjah"];
+document.getElementById("hijriDate").innerText=
+"Hijri Date (Global): "+day+" "+months[month-1]+" "+year+" AH";
 }
 showHijri();
 
-function updateGoldPrice() {
-  const puritySelect = document.getElementById('goldPurity');
-  const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
-  const priceKey = `gold_${selectedKarat}`;
-  document.getElementById('goldPrice').value = rates[priceKey] || rates.gold || 15738;
-  calculate();
+function calculate(){
+
+let goldVal=(+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1);
+let silverVal=(+silverGrams.value||0)*(+silverPrice.value||0);
+
+let personalAssets=
+goldVal+silverVal+
+(+personalCash.value||0)+
+(+personalBank.value||0)+
+(+personalReceivables.value||0)+
+(+personalInvestments.value||0)+
+(+personalCrypto.value||0)+
+(+personalOther.value||0);
+
+let personalLiab=(+personalLiabilities.value||0);
+let personalNet=personalAssets-personalLiab;
+let personalZakat=personalNet>0?personalNet/40:0;
+
+personalResult.innerText=
+"Total Personal Assets: ₹"+formatINR(personalAssets)+
+"\nPersonal Liabilities: ₹"+formatINR(personalLiab)+
+"\nPersonal Net: ₹"+formatINR(personalNet)+
+"\nZakat portion: ₹"+formatINR(personalZakat);
+
+let bizAssets=
+(+stock.value||0)+
+(+raw.value||0)+
+(+finished.value||0)+
+(+bizCash.value||0)+
+(+bizBank.value||0)+
+(+bizReceivables.value||0);
+
+let bizLiab=(+bizLiabilities.value||0);
+let bizNet=bizAssets-bizLiab;
+let bizZakat=bizNet>0?bizNet/40:0;
+
+businessResult.innerText=
+"Total Business Assets: ₹"+formatINR(bizAssets)+
+"\nBusiness Liabilities: ₹"+formatINR(bizLiab)+
+"\nBusiness Net: ₹"+formatINR(bizNet)+
+"\nZakat portion: ₹"+formatINR(bizZakat);
+
+let totalZakat=personalZakat+bizZakat;
+
+let nisabSilver = 612.36 * (+silverPrice.value || 270);
+let nisabGold   = 87.48 * (+goldPrice.value || 15738);
+let nisabThreshold = nisabSilver; // Silver-based
+
+let statusMessage = totalNetWealth >= nisabThreshold ?
+  "✅ Meets/exceeds Nisab → Zakat is due (if held for 1 Hijri year)" :
+  "❌ Below Nisab → No Zakat due currently";
+
+document.getElementById("finalSummary").innerHTML =
+  `<div class="highlight-zakat ${totalZakat > 0 ? '' : 'zero'}">
+     <div class="amount">TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}</div>
+     <div class="status">${statusMessage}</div>
+   </div>`;
+
+document.getElementById("nisabInfo").innerHTML =
+  `Nisab (silver basis): \~ ₹${formatINR(nisabSilver)} (612.36g)<br>` +
+  `Nisab (gold basis): \~ ₹${formatINR(nisabGold)} (87.48g)<br>` +
+  `<strong>Your total net wealth: ₹${formatINR(personalNet + bizNet)}</strong>`;
 }
 
-function calculate() {
-  const goldVal = (+goldGrams.value || 0) * (+goldPrice.value || 0);
-  const silverVal = (+silverGrams.value || 0) * (+silverPrice.value || 0);
+document.querySelectorAll("input, select").forEach(i=>i.addEventListener("input",calculate));
 
-  const personalAssets = goldVal + silverVal +
-    (+personalCash.value || 0) + (+personalBank.value || 0) +
-    (+personalReceivables.value || 0) + (+personalInvestments.value || 0) +
-    (+personalCrypto.value || 0) + (+personalOther.value || 0);
-
-  const personalLiab = (+personalLiabilities.value || 0);
-  const personalNet = Math.max(0, personalAssets - personalLiab);
-
-  const bizAssets = (+stock.value || 0) + (+raw.value || 0) + (+finished.value || 0) +
-    (+bizCash.value || 0) + (+bizBank.value || 0) + (+bizReceivables.value || 0);
-
-  const bizLiab = (+bizLiabilities.value || 0);
-  const bizNet = Math.max(0, bizAssets - bizLiab);
-
-  totalNetWealth = personalNet + bizNet;
-
-  nisabSilver = 612.36 * (+silverPrice.value || 270);
-  nisabGold   = 87.48  * (+goldPrice.value   || 15738);
-  const nisabThreshold = nisabSilver;
-
-  let personalZakat = 0;
-  let bizZakat = 0;
-  totalZakat = 0;
-  statusMessage = "";
-
-  if (totalNetWealth >= nisabThreshold) {
-    personalZakat = personalNet / 40;
-    bizZakat = bizNet / 40;
-    totalZakat = personalZakat + bizZakat;
-    statusMessage = "✅ Meets/exceeds Nisab → Zakat is due (if held for 1 Hijri year)";
-  } else {
-    totalZakat = 0;
-    statusMessage = "❌ Below Nisab → No Zakat due currently";
-  }
-
-  document.getElementById("personalResult").innerText =
-    `Total Personal Assets: ₹${formatINR(personalAssets)}\n` +
-    `Personal Liabilities: ₹${formatINR(personalLiab)}\n` +
-    `Personal Net: ₹${formatINR(personalNet)}\n` +
-    `Zakat portion: ₹${formatINR(personalZakat)}`;
-
-  document.getElementById("businessResult").innerText =
-    `Total Business Assets: ₹${formatINR(bizAssets)}\n` +
-    `Business Liabilities: ₹${formatINR(bizLiab)}\n` +
-    `Business Net: ₹${formatINR(bizNet)}\n` +
-    `Zakat portion: ₹${formatINR(bizZakat)}`;
-
-  // Highlighted Zakat Payable on page
-  const highlightClass = totalZakat > 0 ? '' : 'zero';
-  document.getElementById("finalSummary").innerHTML = `
-    <div class="highlight-zakat ${highlightClass}">
-      <div class="amount">TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}</div>
-      <div class="status">${statusMessage}</div>
-    </div>`;
-
-  document.getElementById("nisabInfo").innerHTML =
-    `Nisab (silver basis - recommended): ≈ ₹${formatINR(nisabSilver)} (612.36 g)<br>` +
-    `Nisab (gold basis): ≈ ₹${formatINR(nisabGold)} (87.48 g)<br>` +
-    `<strong>Your total net wealth: ₹${formatINR(totalNetWealth)}</strong><br>`;
-}
-
-document.querySelectorAll("input").forEach(el => el.addEventListener("input", calculate));
-document.getElementById('goldPurity').addEventListener('change', updateGoldPrice);
-
-async function loadRates() {
-  try {
-    const response = await fetch('rates.json');
-    if (response.ok) {
-      rates = await response.json();
-      document.getElementById('silverPrice').value = rates.silver || 270;
-      updateGoldPrice();
-    }
-  } catch (e) {
-    console.warn('rates.json not loaded, using defaults');
-  }
-  calculate();
-}
-
-function downloadPDF() {
+function downloadPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   let y = 20;
 
   doc.setFontSize(18);
   doc.setTextColor(212, 175, 55);
-  doc.text("Zakat Calculation Report", 105, y, { align: "center" });
+  doc.text("Zakat Calculation Report", 105, y, {align: "center"});
   y += 12;
 
   doc.setFontSize(11);
   doc.setTextColor(0);
-  doc.text("Name: " + (userName.value.trim() || "N/A"), 20, y);
-  doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 140, y);
+  doc.text("Name: " + (userName.value || "N/A"), 20, y);
+  doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 150, y);
   y += 8;
+
   doc.text(document.getElementById("hijriDate").innerText, 20, y);
   y += 12;
 
   // Highlighted Zakat Payable in PDF
   doc.setFontSize(16);
-  doc.setTextColor(totalZakat > 0 ? 200 : 50, totalZakat > 0 ? 50 : 120, totalZakat > 0 ? 50 : 50);
-  doc.setFillColor(totalZakat > 0 ? 255 : 240, totalZakat > 0 ? 235 : 255, totalZakat > 0 ? 238 : 245);
+  doc.setTextColor(totalZakat > 0 ? 220 : 46, totalZakat > 0 ? 53 : 125, totalZakat > 0 ? 69 : 50);
+  doc.setFillColor(totalZakat > 0 ? 255 : 232, totalZakat > 0 ? 235 : 245, totalZakat > 0 ? 238 : 233);
   doc.rect(15, y - 5, 180, 18, 'F');
-  doc.text(`TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}`, 105, y + 6, { align: "center" });
+  doc.text(`TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}`, 105, y + 6, {align: "center"});
   y += 25;
 
   doc.setFontSize(12);
   doc.setTextColor(0);
-  doc.text(statusMessage, 105, y, { align: "center" });
+  doc.text(statusMessage, 105, y, {align: "center"});
   y += 15;
 
   doc.setFontSize(12);
@@ -347,27 +336,25 @@ function downloadPDF() {
 
   doc.autoTable({
     startY: y,
-    head: [['Description', 'Amount (₹)']],
+    head: [['Item', 'Value (₹)']],
     body: [
-      ['Gold', formatINR((+goldGrams.value||0) * (+goldPrice.value||0))],
-      ['Silver', formatINR((+silverGrams.value||0) * (+silverPrice.value||0))],
-      ['Cash in hand', formatINR(+personalCash.value||0)],
-      ['Bank balance', formatINR(+personalBank.value||0)],
+      ['Gold Value', formatINR((+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1))],
+      ['Silver Value', formatINR((+silverGrams.value||0)*(+silverPrice.value||0))],
+      ['Cash', formatINR(+personalCash.value||0)],
+      ['Bank Balance', formatINR(+personalBank.value||0)],
       ['Receivables', formatINR(+personalReceivables.value||0)],
-      ['Investments', formatINR(+personalInvestments.value||0)],
+      ['Investments / Shares', formatINR(+personalInvestments.value||0)],
       ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
-      ['Other liquid', formatINR(+personalOther.value||0)],
-      ['Total Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
-      ['Liabilities', formatINR(+personalLiabilities.value||0)],
-      ['Net Personal', formatINR(personalNet)],
-      ['Zakat portion', formatINR(personalZakat)]
+      ['Other Liquid Wealth', formatINR(+personalOther.value||0)],
+      ['Total Personal Assets', formatINR(personalAssets)],
+      ['Personal Liabilities', formatINR(personalLiab)],
+      ['Personal Net', formatINR(personalNet)],
+      ['Zakat (2.5%)', formatINR(personalZakat)]
     ],
-    margin: {left:20, right:20},
-    theme: 'grid',
-    styles: {fontSize:9, cellPadding:3},
-    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
+    margin: {left: 20},
+    theme: 'grid'
   });
-  y = doc.lastAutoTable.finalY + 12;
+  y = doc.lastAutoTable.finalY + 10;
 
   doc.setFontSize(12);
   doc.text("Business Section", 20, y);
@@ -375,76 +362,57 @@ function downloadPDF() {
 
   doc.autoTable({
     startY: y,
-    head: [['Description', 'Amount (₹)']],
+    head: [['Item', 'Value (₹)']],
     body: [
       ['Closing Stock', formatINR(+stock.value||0)],
-      ['Raw Materials', formatINR(+raw.value||0)],
+      ['Raw Material', formatINR(+raw.value||0)],
       ['Finished Goods', formatINR(+finished.value||0)],
       ['Business Cash', formatINR(+bizCash.value||0)],
       ['Business Bank', formatINR(+bizBank.value||0)],
-      ['Receivables', formatINR(+bizReceivables.value||0)],
-      ['Total Assets', formatINR( (+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) )],
-      ['Liabilities', formatINR(+bizLiabilities.value||0)],
-      ['Net Business', formatINR(bizNet)],
-      ['Zakat portion', formatINR(bizZakat)]
+      ['Customer Receivables', formatINR(+bizReceivables.value||0)],
+      ['Total Business Assets', formatINR(bizAssets)],
+      ['Business Liabilities', formatINR(bizLiab)],
+      ['Business Net', formatINR(bizNet)],
+      ['Zakat (2.5%)', formatINR(bizZakat)]
     ],
-    margin: {left:20, right:20},
-    theme: 'grid',
-    styles: {fontSize:9, cellPadding:3},
-    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
+    margin: {left: 20},
+    theme: 'grid'
   });
-  y = doc.lastAutoTable.finalY + 15;
-
-  doc.setFontSize(10);
-  doc.setTextColor(80);
-  doc.text("Nisab Information & Notes:", 20, y); y += 7;
-  doc.text("Nisab (silver): ≈ ₹" + formatINR(nisabSilver), 25, y); y += 6;
-  doc.text("Your net wealth: ₹" + formatINR(totalNetWealth), 25, y); y += 6;
-  doc.text(statusMessage, 25, y); y += 10;
-
-  doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
-  doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 10;
+  y = doc.lastAutoTable.finalY + 10;
 
   doc.setFontSize(12);
-  doc.setTextColor(0, 100, 0);
-  doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, { align: "center" });
+  doc.text("Nisab Information", 20, y);
+  y += 8;
+  let nisabLines = document.getElementById("nisabInfo").innerText.split("\n");
+  nisabLines.forEach(line => { doc.text(line, 20, y); y += 7; });
   y += 10;
 
   doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.text("Appeal for Taawun 2026", 20, y); y += 7;
-  doc.text("Ek Ladki ki Monthly Kafalat: ₹1800/-", 20, y); y += 7;
-  doc.text("Alhamdulillah, 20 ladkiyon ne Nazira Quran aur Deen ki bunyadi maloomat hasil ki.", 20, y); y += 7;
-  doc.text("6 bachiyon ne tailoring mukammal ki. Hifz & Aalimiyat jaari hai.", 20, y); y += 7;
-  doc.text("Aap Zakat, Sadaqa, Fitrana, Atiya se madad farma sakte hain.", 20, y); y += 10;
+  doc.setTextColor(100);
+  doc.text("Note: Zakat @ 2.5% on net qualifying wealth (after current liabilities).", 20, y);
+  y += 7;
+  doc.text("Consult a scholar for specific rulings.", 20, y);
+  y += 7;
+  doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, {align:"center"});
+  y += 10;
+  doc.setFontSize(10);
+  doc.text("Monthly Kafalat: ₹1800/-", 20, y); y += 7;
+  doc.text("20 girls completed Nazira Quran & basic Deen knowledge.", 20, y); y += 7;
+  doc.text("6 girls completed tailoring training.", 20, y); y += 7;
+  doc.text("Hifz & Aalimiyat ongoing.", 20, y); y += 7;
+  doc.text("Bank A/c: 1200000485740 | IFSC: CNRB0008484", 20, y); y += 7;
+  doc.text("UPI: muftiasifali94@okhdfcbank", 20, y);
 
-  doc.text("Bank Details:", 20, y); y += 7;
-  doc.text("Account No: 1200000485740", 25, y); y += 6;
-  doc.text("IFSC: CNRB0008484", 25, y); y += 6;
-  doc.text("Name: Asif Ali Sayeed Qasmi", 25, y); y += 6;
-  doc.text("Phone: 95022 55318", 25, y); y += 6;
-  doc.text("UPI: muftiasifali94@okhdfcbank", 25, y);
-
-  doc.save(`Zakat_Report_\( {(userName.value || 'User').trim()}_ \){new Date().toISOString().slice(0,10)}.pdf`);
+  doc.save("Zakat_Report.pdf");
 }
 
-// Modal functions
-function openMadarsaModal() {
-  document.getElementById("madarsaModal").style.display = "block";
-}
-function closeMadarsaModal() {
-  document.getElementById("madarsaModal").style.display = "none";
-}
-window.onclick = function(event) {
-  if (event.target == document.getElementById("madarsaModal")) {
-    closeMadarsaModal();
-  }
-}
+document.querySelectorAll("input, select").forEach(i=>i.addEventListener("input",calculate));
 
-window.onload = () => {
-  loadRates();
+window.onload = function() {
+  calculate();
 };
+
 </script>
 
 </body>
-  </html>
+</html>
