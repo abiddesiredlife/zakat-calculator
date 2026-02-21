@@ -27,7 +27,41 @@ input, select {width:100%; padding:8px; margin:4px 0 8px; border-radius:6px; bor
 .small {text-align:center; font-size:12px; color:#777; margin:10px 0;}
 .footer {text-align:center; margin:20px 0; font-size:12px; color:#777;}
 hr {margin:25px 0; border-color:#eee;}
-@media (max-width:600px) {.container {padding:15px;}}
+/* Modal styles for Madarsa popup */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+}
+@media (max-width:600px) {.container {padding:15px;} .modal-content {margin: 20% auto;}}
 </style>
 </head>
 <body>
@@ -128,7 +162,7 @@ hr {margin:25px 0; border-color:#eee;}
 
   <hr>
 
-  <h3 style="text-align:center;">Support Madarsa</h3>
+  <h3 style="text-align:center; cursor:pointer; color:#d4af37;" onclick="openMadarsaModal()">Support Madarsa</h3>
   <p style="text-align:center;">UPI: muftiasifali94@okhdfcbank</p>
   <img src="donation-qr.png" style="width:220px; display:block; margin:15px auto;" alt="Donation QR">
 
@@ -138,6 +172,31 @@ hr {margin:25px 0; border-color:#eee;}
 
   <div class="footer">Powered by ن Enterprises | Prices from rates.json</div>
 
+</div>
+
+<!-- Madarsa Modal Popup -->
+<div id="madarsaModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeMadarsaModal()">&times;</span>
+    <h2 style="text-align:center; color:#0f2027;">మదరసా సాలిహాత్ లిల్బనాత్ ఖమ్మం</h2>
+    <p style="text-align:center; font-weight:bold;">Appeal for Taawun 2026</p>
+    
+    <p><strong>ఒక లడ్కీ కి మంత్లీ కఫాలత్:</strong> ₹1800/-</p>
+    <p>అల్హమ్దులిల్లాహ్, మదరసా హాజా మే అబ్ తక్ 20 లడ్కియోం నే నజీరా ఖురాన్ ఔర్ దీన్ కి బున్యాదీ మలూమాత్ కా ఇల్మ్ హాసిల్ కియా.</p>
+    <p>6 బచ్చియోం నే టైలరింగ్ ముకమ్మల్ కియా. హిఫ్జ్-ఏ-ఖురాన్ ఔర్ ఆలిమియత్ జారీ హై.</p>
+    <p>ఆప్ అప్నీ జకాత్, సదకా, ఫిత్రానా, అతియా సే మదద్ ఫర్మా సక్తే హైం.</p>
+    
+    <hr style="margin:15px 0;">
+    
+    <p><strong>Bank Details:</strong></p>
+    <p>Account No: 1200000485740</p>
+    <p>IFSC Code: CNRB0008484</p>
+    <p>Name: Asif Ali Sayeed Qasmi</p>
+    <p>Phone: 95022 55318</p>
+    <p>UPI: muftiasifali94@okhdfcbank</p>
+    
+    <p style="text-align:center; margin-top:20px; font-weight:bold;">ఆప్ హజ్రత్ మదరసే కో అప్నీ దుఆఓం మే జరూర్ శామిల్ రఖేంగే!<br>Jazakumullahu Khaira</p>
+  </div>
 </div>
 
 <script>
@@ -353,7 +412,7 @@ function downloadPDF() {
   doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
   doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 10;
 
-  // Madarsa section
+  // Madarsa section in PDF
   doc.setFontSize(12);
   doc.setTextColor(0, 100, 0);
   doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, { align: "center" });
@@ -377,10 +436,27 @@ function downloadPDF() {
   doc.save(`Zakat_Report_\( {(userName.value || 'User').trim()}_ \){new Date().toISOString().slice(0,10)}.pdf`);
 }
 
+// Modal functions for page popup
+function openMadarsaModal() {
+  document.getElementById("madarsaModal").style.display = "block";
+}
+
+function closeMadarsaModal() {
+  document.getElementById("madarsaModal").style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modal = document.getElementById("madarsaModal");
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
 window.onload = () => {
   loadRates();
 };
 </script>
 
 </body>
-  </html>
+</html>
