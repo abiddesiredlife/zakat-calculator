@@ -26,55 +26,23 @@ details{margin-bottom:10px;background:#fafafa;padding:10px;border-radius:6px;}
 .small{text-align:center;font-size:12px;color:#777;}
 .footer{text-align:center;margin-top:15px;font-size:12px;color:#777;}
 hr{margin:25px 0;}
-/* NEW: Highlight for TOTAL ZAKAT PAYABLE on page */
-#finalSummary .highlight {
-  font-size: 28px;
+/* Highlight for TOTAL ZAKAT PAYABLE on page */
+#finalSummary .highlight-zakat {
+  font-size: 32px;
   font-weight: bold;
   text-align: center;
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 10px;
-  background: #fff3e0;
-  border: 2px solid #d4af37;
-  color: #c62828;
-}
-#finalSummary .highlight.zero {
-  color: #2e7d32;
-  background: #e8f5e9;
-  border-color: #4caf50;
-}
-/* Modal styles */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
-}
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
   padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 600px;
-  border-radius: 10px;
+  margin: 20px 0;
+  border-radius: 12px;
+  border: 3px solid #d4af37;
+  background: linear-gradient(135deg, #fffde7, #fff8e1);
+  box-shadow: 0 4px 15px rgba(212,175,55,0.4);
 }
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
+#finalSummary .highlight-zakat .amount {
+  color: #c62828; /* red if due */
 }
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
+#finalSummary .highlight-zakat.zero .amount {
+  color: #2e7d32; /* green if zero */
 }
 </style>
 </head>
@@ -172,7 +140,7 @@ hr{margin:25px 0;}
 
 <hr>
 
-<h3 style="text-align:center;cursor:pointer;" onclick="document.getElementById('madarsaModal').style.display='block'">Support Madarsa</h3>
+<h3>Support Madarsa</h3>
 UPI: muftiasifali94@okhdfcbank
 
 <img src="donation-qr.png" style="width:200px;display:block;margin:10px auto;">
@@ -183,26 +151,6 @@ UPI: muftiasifali94@okhdfcbank
 
 <div class="footer">Powered by ن Enterprises</div>
 
-</div>
-
-<!-- Madarsa Modal -->
-<div id="madarsaModal" style="display:none;position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.4);">
-  <div style="background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:500px;border-radius:10px;">
-    <span style="color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer;" onclick="document.getElementById('madarsaModal').style.display='none'">&times;</span>
-    <h2 style="text-align:center;color:#006400;">మదరసా సాలిహాత్ లిల్బనాత్ ఖమ్మం</h2>
-    <p style="text-align:center;font-weight:bold;">Appeal for Taawun 2026</p>
-    <p><strong>ఒక లడ్కీ కి మంత్లీ కఫాలత్:</strong> ₹1800/-</p>
-    <p>అల్హమ్దులిల్లాహ్, 20 లడ్కియోం నే నజీరా ఖురాన్ ఔర్ దీన్ కి బున్యాదీ మలూమాత్ కా ఇల్మ్ హాసిల్ కియా.</p>
-    <p>6 బచ్చియోం నే టైలరింగ్ ముకమ్మల్ కియా. హిఫ్జ్ & ఆలిమియత్ జారీ హై.</p>
-    <p>ఆప్ జకాత్, సదకా, ఫిత్రా, అతియా సే మదద్ ఫర్మా సక్తే హైం.</p>
-    <hr>
-    <p><strong>Bank Details:</strong></p>
-    <p>Account No: 1200000485740</p>
-    <p>IFSC: CNRB0008484</p>
-    <p>Name: Asif Ali Sayeed Qasmi</p>
-    <p>Phone: 95022 55318</p>
-    <p>UPI: muftiasifali94@okhdfcbank</p>
-  </div>
 </div>
 
 <script>
@@ -254,7 +202,7 @@ personalResult.innerText=
 "Total Personal Assets: ₹"+formatINR(personalAssets)+
 "\nPersonal Liabilities: ₹"+formatINR(personalLiab)+
 "\nPersonal Net: ₹"+formatINR(personalNet)+
-"\nZakat portion: ₹"+formatINR(personalZakat);
+"\nZakat (2.5%): ₹"+formatINR(personalZakat);
 
 let bizAssets=
 (+stock.value||0)+
@@ -272,67 +220,57 @@ businessResult.innerText=
 "Total Business Assets: ₹"+formatINR(bizAssets)+
 "\nBusiness Liabilities: ₹"+formatINR(bizLiab)+
 "\nBusiness Net: ₹"+formatINR(bizNet)+
-"\nZakat portion: ₹"+formatINR(bizZakat);
+"\nZakat (2.5%): ₹"+formatINR(bizZakat);
 
 let totalZakat=personalZakat+bizZakat;
 
+finalSummary.innerHTML=
+`<div class="highlight-zakat">
+  TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}
+</div>`;
+
 let nisabSilver = 612.36 * (+silverPrice.value || 270);
-let nisabGold   = 87.48 * (+goldPrice.value || 15738);
-let nisabThreshold = nisabSilver; // Silver-based
+let nisabGold   = 87.48 * (+goldPrice.value || 15649);
 
-let statusMessage = totalNetWealth >= nisabThreshold ?
-  "✅ Meets/exceeds Nisab → Zakat is due (if held for 1 Hijri year)" :
-  "❌ Below Nisab → No Zakat due currently";
-
-document.getElementById("finalSummary").innerHTML =
-  `<div class="highlight-zakat ${totalZakat > 0 ? '' : 'zero'}">
-     <div class="amount">TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}</div>
-     <div class="status">${statusMessage}</div>
-   </div>`;
-
-document.getElementById("nisabInfo").innerHTML =
-  `Nisab (silver basis): \~ ₹${formatINR(nisabSilver)} (612.36g)<br>` +
-  `Nisab (gold basis): \~ ₹${formatINR(nisabGold)} (87.48g)<br>` +
-  `<strong>Your total net wealth: ₹${formatINR(personalNet + bizNet)}</strong>`;
+nisabInfo.innerText=
+"Nisab (approx using silver): \~ ₹"+formatINR(nisabSilver)+" (612.36g)"+
+"\nUsing gold: \~ ₹"+formatINR(nisabGold)+" (87.48g)"+
+"\nYour total net wealth: ₹"+formatINR(personalNet + bizNet)+
+"\n" + ( (personalNet + bizNet) >= Math.min(nisabSilver, nisabGold) ?
+  "You meet/exceed Nisab → Zakat is due if held for 1 Hijri year." :
+  "Below Nisab → No Zakat due currently.");
 }
 
 document.querySelectorAll("input, select").forEach(i=>i.addEventListener("input",calculate));
 
 function downloadPDF(){
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
+  let doc=new jsPDF();
+  let y=20;
 
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setTextColor(212, 175, 55);
-  doc.text("Zakat Calculation Report", 105, y, {align: "center"});
-  y += 12;
+  doc.text("Zakat Calculation Report",105,y,{align:"center"});
+  y+=12;
 
   doc.setFontSize(11);
   doc.setTextColor(0);
-  doc.text("Name: " + (userName.value || "N/A"), 20, y);
-  doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 150, y);
-  y += 8;
+  doc.text("Name: "+(userName.value||"N/A"),20,y);
+  doc.text("Date: "+new Date().toLocaleDateString(),150,y);
+  y+=8;
 
-  doc.text(document.getElementById("hijriDate").innerText, 20, y);
-  y += 12;
+  doc.text(document.getElementById("hijriDate").innerText,20,y);
+  y+=12;
 
-  // Highlighted Zakat Payable in PDF
+  doc.setFontSize(14);
+  doc.setTextColor(220, 53, 69);
   doc.setFontSize(16);
-  doc.setTextColor(totalZakat > 0 ? 220 : 46, totalZakat > 0 ? 53 : 125, totalZakat > 0 ? 69 : 50);
-  doc.setFillColor(totalZakat > 0 ? 255 : 232, totalZakat > 0 ? 235 : 245, totalZakat > 0 ? 238 : 233);
-  doc.rect(15, y - 5, 180, 18, 'F');
-  doc.text(`TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}`, 105, y + 6, {align: "center"});
-  y += 25;
+  doc.text("TOTAL ZAKAT PAYABLE: ₹"+formatINR(totalZakat),105,y,{align:"center"});
+  y+=15;
 
   doc.setFontSize(12);
-  doc.setTextColor(0);
-  doc.text(statusMessage, 105, y, {align: "center"});
-  y += 15;
-
-  doc.setFontSize(12);
-  doc.text("Personal Section", 20, y);
-  y += 8;
+  doc.text("Personal Section",20,y);
+  y+=8;
 
   doc.autoTable({
     startY: y,
@@ -357,8 +295,8 @@ function downloadPDF(){
   y = doc.lastAutoTable.finalY + 10;
 
   doc.setFontSize(12);
-  doc.text("Business Section", 20, y);
-  y += 8;
+  doc.text("Business Section",20,y);
+  y+=8;
 
   doc.autoTable({
     startY: y,
@@ -381,32 +319,15 @@ function downloadPDF(){
   y = doc.lastAutoTable.finalY + 10;
 
   doc.setFontSize(12);
-  doc.text("Nisab Information", 20, y);
-  y += 8;
+  doc.text("Nisab Information",20,y);
+  y+=8;
   let nisabLines = document.getElementById("nisabInfo").innerText.split("\n");
-  nisabLines.forEach(line => { doc.text(line, 20, y); y += 7; });
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text("Note: Zakat @ 2.5% on net qualifying wealth (after current liabilities).", 20, y);
-  y += 7;
-  doc.text("Consult a scholar for specific rulings.", 20, y);
-  y += 7;
-  doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, {align:"center"});
-  y += 10;
-  doc.setFontSize(10);
-  doc.text("Monthly Kafalat: ₹1800/-", 20, y); y += 7;
-  doc.text("20 girls completed Nazira Quran & basic Deen knowledge.", 20, y); y += 7;
-  doc.text("6 girls completed tailoring training.", 20, y); y += 7;
-  doc.text("Hifz & Aalimiyat ongoing.", 20, y); y += 7;
-  doc.text("Bank A/c: 1200000485740 | IFSC: CNRB0008484", 20, y); y += 7;
-  doc.text("UPI: muftiasifali94@okhdfcbank", 20, y);
+  nisabLines.forEach(line => { doc.text(line,20,y); y+=7; });
 
   doc.save("Zakat_Report.pdf");
 }
 
-document.querySelectorAll("input, select").forEach(i=>i.addEventListener("input",calculate));
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate));
 
 window.onload = function() {
   calculate();
