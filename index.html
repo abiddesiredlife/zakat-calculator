@@ -7,7 +7,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 
-<!-- Updated reliable CDNs for jsPDF + autoTable -->
+<!-- Reliable CDNs with integrity -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqzqGV89gcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" integrity="sha512-2/7vX6YJ0r7QeGfW2mP9kT6qX9d3v8p3V3w+0E8G4J6oG3wK8lV6c8j6d3Qb7s1p2s3S0D8pK3lA2b3Y3fC6vQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -42,7 +42,7 @@ hr {margin:25px 0; border-color:#eee;}
   <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
   <div id="hijriDate" class="small"></div>
 
-  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year. Prices from rates.json (update daily in repo).</p>
+  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year.</p>
 
   <label>Optional Name (పేరు)</label>
   <input type="text" id="userName" placeholder="Your name (optional for PDF)">
@@ -142,6 +142,13 @@ hr {margin:25px 0; border-color:#eee;}
 </div>
 
 <script>
+// Global variables for PDF access
+let totalNetWealth = 0;
+let nisabSilver = 0;
+let nisabGold = 0;
+let totalZakat = 0;
+let statusMessage = "";
+
 let rates = {
   gold_24k: 15738,
   gold_22k: 14426,
@@ -149,13 +156,6 @@ let rates = {
   silver: 270,
   lastUpdated: "21 Feb 2026 (Hyderabad)"
 };
-
-let totalNetWealth = 0;
-let nisabSilver = 0;
-let nisabGold = 0;
-let nisabThreshold = 0;
-let totalZakat = 0;
-let statusMessage = "";
 
 function formatINR(num) {
   return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -212,7 +212,7 @@ function calculate() {
 
   nisabSilver = 612.36 * (+silverPrice.value || 270);
   nisabGold   = 87.48  * (+goldPrice.value   || 15738);
-  nisabThreshold = nisabSilver;  // Silver-based Nisab (Hanafi / common in India)
+  const nisabThreshold = nisabSilver;  // Silver-based Nisab
 
   let personalZakat = 0;
   let bizZakat = 0;
@@ -269,8 +269,8 @@ async function loadRates() {
 }
 
 function downloadPDF() {
-  if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-    alert("PDF library failed to load. Check internet connection, disable ad-blockers/extensions, or try Chrome/Edge browser.");
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF library (jsPDF) failed to load.\n\nTry:\n1. Disable ad-blocker/extensions\n2. Use incognito mode\n3. Use Chrome/Edge\n4. Open via GitHub Pages URL (not local file)");
     console.error("jsPDF not loaded");
     return;
   }
@@ -352,9 +352,10 @@ function downloadPDF() {
     });
     y = doc.lastAutoTable.finalY + 15;
 
+    // Nisab & Notes
     doc.setFontSize(10);
     doc.setTextColor(80);
-    doc.text("Nisab & Notes:", 20, y); y += 7;
+    doc.text("Nisab Information & Notes:", 20, y); y += 7;
     doc.text("Nisab (silver): ≈ ₹" + formatINR(nisabSilver), 25, y); y += 6;
     doc.text("Your net wealth: ₹" + formatINR(totalNetWealth), 25, y); y += 6;
     doc.text(statusMessage, 25, y); y += 10;
@@ -362,30 +363,31 @@ function downloadPDF() {
     doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
     doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 10;
 
-    // Added Madarsa appeal section in PDF
+    // Madarsa Appeal Section
     doc.setFontSize(12);
     doc.setTextColor(0, 100, 0);
-    doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, {align: "center"});
-    y += 8;
+    doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, { align: "center" });
+    y += 10;
 
     doc.setFontSize(10);
     doc.setTextColor(0);
-    doc.text("Ek Ladki ki Monthly Kafalat: ₹1800/-", 20, y); y += 6;
-    doc.text("Alhamdulillah, 20 ladkiyon ne Nazira Quran aur Deen ki bunyadi maloomat hasil ki.", 20, y); y += 6;
-    doc.text("6 bachiyon ne tailoring training mukammal ki. Hifz-e-Quran aur Aalimiyat jaari hai.", 20, y); y += 6;
-    doc.text("Aap apni Zakat, Sadaqa, Fitrana, Atiya se madad farma sakte hain.", 20, y); y += 8;
+    doc.text("Appeal for Taawun 2026", 20, y); y += 7;
+    doc.text("Ek Ladki ki Monthly Kafalat: ₹1800/-", 20, y); y += 7;
+    doc.text("Alhamdulillah, 20 ladkiyon ne Nazira Quran aur Deen ki bunyadi maloomat hasil ki.", 20, y); y += 7;
+    doc.text("6 bachiyon ne tailoring mukammal ki. Hifz-e-Quran aur Aalimiyat jaari hai.", 20, y); y += 7;
+    doc.text("Aap apni Zakat, Sadaqa, Fitrana, Atiya se madad farma sakte hain.", 20, y); y += 10;
 
-    doc.text("Account Details:", 20, y); y += 6;
+    doc.text("Bank Details:", 20, y); y += 7;
     doc.text("Account No: 1200000485740", 25, y); y += 6;
-    doc.text("IFSC: CNRB0008484", 25, y); y += 6;
-    doc.text("Mufti/Qazi: Asif Ali Sayeed Qasmi", 25, y); y += 6;
-    doc.text("Phone: 95022 55318 / 97586 60669", 25, y); y += 6;
+    doc.text("IFSC Code: CNRB0008484", 25, y); y += 6;
+    doc.text("Name: Asif Ali Sayeed Qasmi", 25, y); y += 6;
+    doc.text("Phone: 95022 55318", 25, y); y += 6;
     doc.text("UPI: muftiasifali94@okhdfcbank", 25, y);
 
-    doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
+    doc.save(`Zakat_Report_\( {(userName.value || 'User').trim()}_ \){new Date().toISOString().slice(0,10)}.pdf`);
   } catch (err) {
-    console.error("PDF error:", err);
-    alert("PDF creation failed: " + err.message + "\nCheck console (F12) or try refreshing / different browser.");
+    console.error("PDF generation failed:", err);
+    alert("PDF creation failed: " + (err.message || "Unknown error") + "\nPlease check console (F12) and report the error.");
   }
 }
 
