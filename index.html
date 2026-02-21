@@ -49,31 +49,24 @@ hr {margin:25px 0; border-color:#eee;}
   <p class="guide">Include gold, silver, cash, bank, receivables, investments etc. that are zakatable.</p>
 
   <label>Gold (grams) - బంగారం (గ్రాములు)</label>
-  <input type="number" id="goldGrams" min="0" step="any" placeholder="Total pure-equivalent gold weight in grams">
+  <input type="number" id="goldGrams" min="0" step="any" placeholder="Total gold weight in grams (for selected purity)">
 
   <label>Gold Purity - బంగారం స్వచ్ఛత</label>
   <select id="goldPurity">
-    <option value="1">24K / Pure</option>
-    <option value="0.916" selected>22K (common jewellery)</option>
-    <option value="0.75">18K</option>
+    <option value="1" data-karat="24k">24K / Pure</option>
+    <option value="0.916" data-karat="22k" selected>22K (common jewellery)</option>
+    <option value="0.75" data-karat="18k">18K</option>
   </select>
-  <div class="guide">Select purity → tool adjusts value automatically (e.g. 100g 22K = 91.6g pure gold value)</div>
+  <div class="guide">Select purity → price updates automatically to that karat's rate (from rates.json). For daily updates, edit rates.json in GitHub repo.</div>
 
-  <label>Gold Price (24K per gram) - బంగారం ధర (24K గ్రాముకు)</label>
-  <input type="number" id="goldPrice" value="15700" step="10" placeholder="Current 24K rate (≈ ₹15,700 today in Hyderabad)">
-  <div class="guide">Update from local jeweller / goodreturns.in</div>
+  <label>Gold Price (per gram for selected purity) - బంగారం ధర (ఎంచుకున్న స్వచ్ఛతకు గ్రాముకు)</label>
+  <input type="number" id="goldPrice" value="15700" step="10" placeholder="Per gram rate for selected purity (auto-updates)">
 
   <label>Silver (grams) - వెండి (గ్రాములు)</label>
   <input type="number" id="silverGrams" min="0" step="any" placeholder="Total silver weight in grams (utensils, bars, coins etc.)">
 
   <label>Silver Price (per gram) - వెండి ధర (గ్రాముకు)</label>
   <input type="number" id="silverPrice" value="270" step="1" placeholder="Current silver rate (≈ ₹270 today)">
-  <div class="guide">Silver-based Nisab is usually lower and more commonly followed</div>
-
-  <button type="button" class="button" style="background:#444; color:white; width:auto; padding:10px 16px;" 
-    onclick="window.open('https://www.goodreturns.in/gold-rates/hyderabad.html','_blank')">
-    Check Latest Hyderabad Gold & Silver Rates →
-  </button>
 
   <label>Cash in Hand - నగదు (ఇంట్లో / దగ్గర)</label>
   <input type="number" id="personalCash" min="0" step="any" placeholder="Physical cash you currently have">
@@ -147,6 +140,8 @@ hr {margin:25px 0; border-color:#eee;}
 </div>
 
 <script>
+let rates = { gold_24k: 15700, gold_22k: 14375, gold_18k: 11775, silver: 270 }; // Fallback defaults
+
 function formatINR(num) {
   return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
@@ -173,7 +168,7 @@ function showHijri() {
 showHijri();
 
 function calculate() {
-  const goldVal = (+goldGrams.value || 0) * (+goldPrice.value || 0) * (+goldPurity.value || 1);
+  const goldVal = (+goldGrams.value || 0) * (+goldPrice.value || 0);
   const silverVal = (+silverGrams.value || 0) * (+silverPrice.value || 0);
 
   const personalAssets = goldVal + silverVal +
@@ -221,6 +216,29 @@ function calculate() {
 
 document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calculate));
 
+async function loadRates() {
+  try {
+    const response = await fetch('rates.json');
+    rates = await response.json();
+    // Set initial prices based on default purity (22K)
+    const puritySelect = document.getElementById('goldPurity');
+    const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
+    document.getElementById('goldPrice').value = rates[`gold_${selectedKarat}`] || 15700;
+    document.getElementById('silverPrice').value = rates.silver || 270;
+    calculate();
+  } catch (error) {
+    console.error('Failed to load rates.json:', error);
+    // Use fallback defaults
+  }
+}
+
+document.getElementById('goldPurity').addEventListener('change', () => {
+  const puritySelect = document.getElementById('goldPurity');
+  const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
+  document.getElementById('goldPrice').value = rates[`gold_${selectedKarat}`] || document.getElementById('goldPrice').value;
+  calculate();
+});
+
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -252,7 +270,7 @@ function downloadPDF() {
     startY: y,
     head: [['Description', 'Amount (₹)']],
     body: [
-      ['Gold (adjusted)', formatINR((+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1))],
+      ['Gold', formatINR((+goldGrams.value||0)*(+goldPrice.value||0))],
       ['Silver', formatINR((+silverGrams.value||0)*(+silverPrice.value||0))],
       ['Cash in hand', formatINR(+personalCash.value||0)],
       ['Bank balance', formatINR(+personalBank.value||0)],
@@ -260,10 +278,10 @@ function downloadPDF() {
       ['Investments / Shares', formatINR(+personalInvestments.value||0)],
       ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
       ['Other liquid wealth', formatINR(+personalOther.value||0)],
-      ['Total Personal Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
+      ['Total Personal Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
       ['Personal Liabilities', formatINR(+personalLiabilities.value||0)],
-      ['Personal Net', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0) )],
-      ['Zakat 2.5%', formatINR( Math.max(0, ((+goldGrams.value||0)*(+goldPrice.value||0)*(+goldPurity.value||1) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0)) / 40 ) )]
+      ['Personal Net', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0) )],
+      ['Zakat 2.5%', formatINR( Math.max(0, ((+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0)) / 40 ) )]
     ],
     margin: { left: 20, right: 20 },
     theme: 'grid',
@@ -307,13 +325,13 @@ function downloadPDF() {
 
   doc.text("- Zakat @ 2.5% on net zakatable wealth", 20, y); y += 6;
   doc.text("- Consult scholar for your specific case", 20, y); y += 6;
-  doc.text("- Prices are approximate – verify locally", 20, y);
+  doc.text("- Prices from rates.json – update daily via GitHub", 20, y);
 
   doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 window.onload = () => {
-  calculate();
+  loadRates();
 };
 </script>
 
