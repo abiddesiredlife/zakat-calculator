@@ -27,9 +27,10 @@ input, select {width:100%; padding:8px; margin:4px 0 8px; border-radius:6px; bor
 .small {text-align:center; font-size:12px; color:#777; margin:10px 0;}
 .footer {text-align:center; margin:20px 0; font-size:12px; color:#777;}
 hr {margin:25px 0; border-color:#eee;}
-/* Highlighted Zakat Payable - BIG & CATCHY */
-.highlight-zakat {
-  font-size: 32px !important;
+
+/* Highlighted TOTAL ZAKAT PAYABLE on page */
+#finalSummary .highlight-zakat {
+  font-size: 32px;
   font-weight: bold;
   padding: 20px;
   margin: 20px 0;
@@ -39,22 +40,9 @@ hr {margin:25px 0; border-color:#eee;}
   background: linear-gradient(135deg, #fffde7, #fff8e1);
   box-shadow: 0 4px 15px rgba(212,175,55,0.4);
 }
-.highlight-zakat .amount {
-  color: #c62828; /* red for due */
-  font-size: 40px;
-}
-.highlight-zakat.zero .amount {
-  color: #2e7d32; /* green for zero */
-}
-.highlight-zakat .status {
-  font-size: 20px;
-  margin-top: 10px;
-  color: #424242;
-}
-@media (max-width:600px) {
-  .highlight-zakat {font-size:26px !important;}
-  .highlight-zakat .amount {font-size:32px;}
-}
+#finalSummary .amount {color: #c62828;}
+#finalSummary .zero .amount {color: #2e7d32;}
+#finalSummary .status {font-size: 18px; margin-top: 10px; color: #424242;}
 </style>
 </head>
 <body>
@@ -193,7 +181,6 @@ hr {margin:25px 0; border-color:#eee;}
 </div>
 
 <script>
-// Global variables for PDF access
 let rates = {
   gold_24k: 15738,
   gold_22k: 14426,
@@ -263,7 +250,7 @@ function calculate() {
 
   nisabSilver = 612.36 * (+silverPrice.value || 270);
   nisabGold   = 87.48  * (+goldPrice.value   || 15738);
-  const nisabThreshold = nisabSilver;  // Silver-based Nisab (common Hanafi practice)
+  const nisabThreshold = nisabSilver;
 
   let personalZakat = 0;
   let bizZakat = 0;
@@ -460,4 +447,4 @@ window.onload = () => {
 </script>
 
 </body>
-</html>
+  </html>
