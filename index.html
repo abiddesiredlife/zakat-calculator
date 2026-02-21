@@ -40,7 +40,7 @@ hr {margin:25px 0; border-color:#eee;}
   <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
   <div id="hijriDate" class="small"></div>
 
-  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Prices auto-update from rates.json (update daily via GitHub repo).</p>
+  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year.</p>
 
   <label>Optional Name (పేరు)</label>
   <input type="text" id="userName" placeholder="Your name (optional for PDF)">
@@ -57,25 +57,25 @@ hr {margin:25px 0; border-color:#eee;}
     <option value="0.916" data-karat="22k" selected>22K (common jewellery)</option>
     <option value="0.75" data-karat="18k">18K</option>
   </select>
-  <div class="guide">Changing purity auto-updates the price below to match the karat rate from rates.json.</div>
+  <div class="guide">Changing purity auto-updates price from rates.json</div>
 
-  <label>Gold Price (per gram for selected purity) - బంగారం ధర (ఎంచుకున్న స్వచ్ఛతకు గ్రాముకు)</label>
-  <input type="number" id="goldPrice" value="15700" step="10" placeholder="Auto-updates based on purity" readonly style="background:#f9f9f9;">
+  <label>Gold Price (per gram for selected purity)</label>
+  <input type="number" id="goldPrice" value="15738" step="10" readonly style="background:#f9f9f9;">
 
   <label>Silver (grams) - వెండి (గ్రాములు)</label>
   <input type="number" id="silverGrams" min="0" step="any" placeholder="Total silver weight in grams">
 
-  <label>Silver Price (per gram) - వెండి ధర (గ్రాముకు)</label>
-  <input type="number" id="silverPrice" value="270" step="1" placeholder="From rates.json" readonly style="background:#f9f9f9;">
+  <label>Silver Price (per gram)</label>
+  <input type="number" id="silverPrice" value="270" step="1" readonly style="background:#f9f9f9;">
 
   <label>Cash in Hand - నగదు (ఇంట్లో / దగ్గర)</label>
-  <input type="number" id="personalCash" min="0" step="any" placeholder="Physical cash you currently have">
+  <input type="number" id="personalCash" min="0" step="any" placeholder="Physical cash you have">
 
   <label>Bank Balance / Savings - బ్యాంకు బ్యాలెన్స్</label>
   <input type="number" id="personalBank" min="0" step="any" placeholder="All bank accounts total">
 
-  <label>Receivables (debts owed to you) - ఇతరులు చెల్లించాల్సిన డబ్బు</label>
-  <input type="number" id="personalReceivables" min="0" step="any" placeholder="Loans given, pending salary, etc. (if recoverable)">
+  <label>Receivables (owed to you) - ఇతరులు చెల్లించాల్సిన డబ్బు</label>
+  <input type="number" id="personalReceivables" min="0" step="any" placeholder="Loans given, pending salary etc. (recoverable)">
 
   <label>Investments / Shares / Mutual Funds - పెట్టుబడులు / షేర్లు</label>
   <input type="number" id="personalInvestments" min="0" step="any" placeholder="Current market value">
@@ -84,19 +84,19 @@ hr {margin:25px 0; border-color:#eee;}
   <input type="number" id="personalCrypto" min="0" step="any" placeholder="Current value (if zakatable per your madhab)">
 
   <label>Other Liquid Wealth - ఇతర ద్రవ ఆస్తులు</label>
-  <input type="number" id="personalOther" min="0" step="any" placeholder="Any other cash-like or easily sellable assets">
+  <input type="number" id="personalOther" min="0" step="any" placeholder="Other cash-like / sellable assets">
 
   <label>Total Personal Current Liabilities - ప్రస్తుత వ్యక్తిగత రుణాలు</label>
-  <input type="number" id="personalLiabilities" min="0" step="any" placeholder="Debts due soon (long-term loans usually excluded)">
+  <input type="number" id="personalLiabilities" min="0" step="any" placeholder="Debts due soon (long-term usually excluded)">
 
   <div class="result-box" id="personalResult"></div>
 
   <hr>
 
   <div class="section-title">BUSINESS ASSETS (వ్యాపార ఆస్తులు)</div>
-  <p class="guide">Use current sale/market value (not cost price). Deduct only current payables.</p>
+  <p class="guide">Use current sale value (not cost). Deduct only current payables.</p>
 
-  <label>Closing Stock (at sale value) - ముగింపు స్టాక్ (అమ్మకం విలువ)</label>
+  <label>Closing Stock (sale value) - ముగింపు స్టాక్ (అమ్మకం విలువ)</label>
   <input type="number" id="stock" min="0" step="any" placeholder="Market value of unsold goods">
 
   <label>Raw Materials - ముడి సరుకు విలువ</label>
@@ -135,17 +135,18 @@ hr {margin:25px 0; border-color:#eee;}
     <button class="button">Pay via UPI</button>
   </a>
 
-  <div class="footer">Powered by ن Enterprises | Prices from rates.json (last updated in repo)</div>
+  <div class="footer">Powered by ن Enterprises | Prices from rates.json</div>
 
 </div>
 
 <script>
 let rates = {
-  gold_24k: 15700,
-  gold_22k: 14375,
-  gold_18k: 11775,
-  silver: 270
-}; // Fallback
+  gold_24k: 15738,
+  gold_22k: 14426,
+  gold_18k: 11803,
+  silver: 270,
+  lastUpdated: "21 Feb 2026"
+};
 
 function formatINR(num) {
   return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -176,7 +177,7 @@ function updateGoldPrice() {
   const puritySelect = document.getElementById('goldPurity');
   const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
   const priceKey = `gold_${selectedKarat}`;
-  document.getElementById('goldPrice').value = rates[priceKey] || rates.gold || 15700; // fallback to old 'gold' key if exists
+  document.getElementById('goldPrice').value = rates[priceKey] || rates.gold || 15738;
   calculate();
 }
 
@@ -190,47 +191,58 @@ function calculate() {
     (+personalCrypto.value || 0) + (+personalOther.value || 0);
 
   const personalLiab = (+personalLiabilities.value || 0);
-  const personalNet = personalAssets - personalLiab;
-  const personalZakat = personalNet > 0 ? personalNet / 40 : 0;
-
-  document.getElementById("personalResult").innerText =
-    `Total Personal Assets: ₹${formatINR(personalAssets)}\n` +
-    `Personal Liabilities: ₹${formatINR(personalLiab)}\n` +
-    `Personal Net: ₹${formatINR(personalNet)}\n` +
-    `Zakat (2.5%): ₹${formatINR(personalZakat)}`;
+  const personalNet = Math.max(0, personalAssets - personalLiab);
 
   const bizAssets = (+stock.value || 0) + (+raw.value || 0) + (+finished.value || 0) +
     (+bizCash.value || 0) + (+bizBank.value || 0) + (+bizReceivables.value || 0);
 
   const bizLiab = (+bizLiabilities.value || 0);
-  const bizNet = bizAssets - bizLiab;
-  const bizZakat = bizNet > 0 ? bizNet / 40 : 0;
+  const bizNet = Math.max(0, bizAssets - bizLiab);
+
+  const totalNetWealth = personalNet + bizNet;
+
+  const nisabSilver = 612.36 * (+silverPrice.value || 270);
+  const nisabGold   = 87.48  * (+goldPrice.value   || 15738);
+  const nisabThreshold = nisabSilver;  // Using silver-based Nisab (common Hanafi practice in India)
+
+  let personalZakat = 0;
+  let bizZakat = 0;
+  let totalZakat = 0;
+  let statusMessage = "";
+
+  if (totalNetWealth >= nisabThreshold) {
+    personalZakat = personalNet / 40;
+    bizZakat = bizNet / 40;
+    totalZakat = personalZakat + bizZakat;
+    statusMessage = "✅ Meets/exceeds Nisab → Zakat is due (if held for 1 Hijri year)";
+  } else {
+    totalZakat = 0;
+    statusMessage = "❌ Below Nisab → No Zakat due currently";
+  }
+
+  document.getElementById("personalResult").innerText =
+    `Total Personal Assets: ₹${formatINR(personalAssets)}\n` +
+    `Personal Liabilities: ₹${formatINR(personalLiab)}\n` +
+    `Personal Net: ₹${formatINR(personalNet)}\n` +
+    `Zakat portion: ₹${formatINR(personalZakat)}`;
 
   document.getElementById("businessResult").innerText =
     `Total Business Assets: ₹${formatINR(bizAssets)}\n` +
     `Business Liabilities: ₹${formatINR(bizLiab)}\n` +
     `Business Net: ₹${formatINR(bizNet)}\n` +
-    `Zakat (2.5%): ₹${formatINR(bizZakat)}`;
+    `Zakat portion: ₹${formatINR(bizZakat)}`;
 
-  const totalZakat = personalZakat + bizZakat;
-  document.getElementById("finalSummary").innerText = `TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}`;
-
-  const nisabSilver = 612.36 * (+silverPrice.value || 270);
-  const nisabGold   = 87.48  * (+goldPrice.value   || 15700);
+  document.getElementById("finalSummary").innerText =
+    `TOTAL ZAKAT PAYABLE: ₹\( {formatINR(totalZakat)}\n \){statusMessage}`;
 
   document.getElementById("nisabInfo").innerHTML =
-    `Nisab (silver basis): ≈ ₹${formatINR(nisabSilver)} (612.36 g)<br>` +
-    `Nisab (gold basis):   ≈ ₹${formatINR(nisabGold)} (87.48 g)<br>` +
-    `<strong>Your total net wealth: ₹${formatINR(personalNet + bizNet)}</strong><br>` +
-    ((personalNet + bizNet) >= Math.min(nisabSilver, nisabGold) ?
-      "✅ You meet/exceed Nisab → Zakat is due (if held for 1 Hijri year)" :
-      "❌ Below Nisab → No Zakat due currently");
+    `Nisab (silver basis - recommended): ≈ ₹${formatINR(nisabSilver)} (612.36 g)<br>` +
+    `Nisab (gold basis): ≈ ₹${formatINR(nisabGold)} (87.48 g)<br>` +
+    `<strong>Your total net wealth: ₹${formatINR(totalNetWealth)}</strong><br>` +
+    statusMessage;
 }
 
-document.querySelectorAll("input, select").forEach(el => {
-  if (el.id !== 'goldPurity') el.addEventListener("input", calculate);
-});
-
+document.querySelectorAll("input").forEach(el => el.addEventListener("input", calculate));
 document.getElementById('goldPurity').addEventListener('change', updateGoldPrice);
 
 async function loadRates() {
@@ -239,10 +251,10 @@ async function loadRates() {
     if (response.ok) {
       rates = await response.json();
       document.getElementById('silverPrice').value = rates.silver || 270;
-      updateGoldPrice(); // Apply to current purity
+      updateGoldPrice();
     }
-  } catch (error) {
-    console.error('Failed to load rates.json:', error);
+  } catch (e) {
+    console.warn('rates.json not loaded, using defaults');
   }
   calculate();
 }
@@ -258,7 +270,6 @@ function downloadPDF() {
   y += 12;
 
   doc.setFontSize(11);
-  doc.setTextColor(0);
   doc.text("Name: " + (userName.value.trim() || "N/A"), 20, y);
   doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 140, y);
   y += 8;
@@ -271,36 +282,35 @@ function downloadPDF() {
   y += 15;
 
   doc.setFontSize(12);
-  doc.text("Personal Section (వ్యక్తిగత)", 20, y);
+  doc.text("Personal Section", 20, y);
   y += 8;
 
   doc.autoTable({
     startY: y,
     head: [['Description', 'Amount (₹)']],
     body: [
-      ['Gold (' + document.getElementById('goldPurity').options[document.getElementById('goldPurity').selectedIndex].text + ')', formatINR((+goldGrams.value||0)*(+goldPrice.value||0))],
-      ['Silver', formatINR((+silverGrams.value||0)*(+silverPrice.value||0))],
+      ['Gold', formatINR((+goldGrams.value||0) * (+goldPrice.value||0))],
+      ['Silver', formatINR((+silverGrams.value||0) * (+silverPrice.value||0))],
       ['Cash in hand', formatINR(+personalCash.value||0)],
       ['Bank balance', formatINR(+personalBank.value||0)],
       ['Receivables', formatINR(+personalReceivables.value||0)],
-      ['Investments / Shares', formatINR(+personalInvestments.value||0)],
+      ['Investments', formatINR(+personalInvestments.value||0)],
       ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
-      ['Other liquid wealth', formatINR(+personalOther.value||0)],
-      ['Total Personal Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
-      ['Personal Liabilities', formatINR(+personalLiabilities.value||0)],
-      ['Personal Net', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0) )],
-      ['Zakat 2.5%', formatINR( Math.max(0, ((+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0)) / 40 ) )]
+      ['Other liquid', formatINR(+personalOther.value||0)],
+      ['Total Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
+      ['Liabilities', formatINR(+personalLiabilities.value||0)],
+      ['Net Personal', formatINR(personalNet)],
+      ['Zakat portion', formatINR(personalZakat)]
     ],
-    margin: { left: 20, right: 20 },
+    margin: {left:20, right:20},
     theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 3 },
-    headStyles: { fillColor: [212, 175, 55], textColor: [0,0,0] }
+    styles: {fontSize:9, cellPadding:3},
+    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
   });
   y = doc.lastAutoTable.finalY + 12;
 
-  // Business table (same as before)
   doc.setFontSize(12);
-  doc.text("Business Section (వ్యాపారం)", 20, y);
+  doc.text("Business Section", 20, y);
   y += 8;
 
   doc.autoTable({
@@ -312,29 +322,29 @@ function downloadPDF() {
       ['Finished Goods', formatINR(+finished.value||0)],
       ['Business Cash', formatINR(+bizCash.value||0)],
       ['Business Bank', formatINR(+bizBank.value||0)],
-      ['Customer Receivables', formatINR(+bizReceivables.value||0)],
-      ['Total Business Assets', formatINR( (+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) )],
-      ['Business Liabilities', formatINR(+bizLiabilities.value||0)],
-      ['Business Net', formatINR( (+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) - (+bizLiabilities.value||0) )],
-      ['Zakat 2.5%', formatINR( Math.max(0, ((+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) - (+bizLiabilities.value||0)) / 40 ) )]
+      ['Receivables', formatINR(+bizReceivables.value||0)],
+      ['Total Assets', formatINR(bizAssets)],
+      ['Liabilities', formatINR(+bizLiabilities.value||0)],
+      ['Net Business', formatINR(bizNet)],
+      ['Zakat portion', formatINR(bizZakat)]
     ],
-    margin: { left: 20, right: 20 },
+    margin: {left:20, right:20},
     theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 3 },
-    headStyles: { fillColor: [212, 175, 55], textColor: [0,0,0] }
+    styles: {fontSize:9, cellPadding:3},
+    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
   });
   y = doc.lastAutoTable.finalY + 12;
 
   doc.setFontSize(10);
   doc.setTextColor(80);
-  doc.text("Nisab & Notes:", 20, y); y += 7;
-  let nisabLines = document.getElementById("nisabInfo").innerText.split('\n');
-  nisabLines.forEach(line => { doc.text(line.trim(), 25, y); y += 6; });
-  y += 5;
+  doc.text("Nisab Information & Notes:", 20, y); y += 7;
+  doc.text("Nisab (silver): ≈ ₹" + formatINR(nisabSilver), 25, y); y += 6;
+  doc.text("Your net wealth: ₹" + formatINR(totalNetWealth), 25, y); y += 6;
+  doc.text(document.getElementById("nisabInfo").innerText.split('\n').pop().trim(), 25, y); y += 10;
 
-  doc.text("- Zakat @ 2.5% on net zakatable wealth", 20, y); y += 6;
-  doc.text("- Prices from rates.json (updated: " + (rates.lastUpdated || 'unknown') + ")", 20, y); y += 6;
-  doc.text("- Consult scholar for rulings", 20, y);
+  doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
+  doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 6;
+  doc.text("- Consult a scholar for your situation", 20, y);
 
   doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
 }
