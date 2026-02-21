@@ -27,41 +27,34 @@ input, select {width:100%; padding:8px; margin:4px 0 8px; border-radius:6px; bor
 .small {text-align:center; font-size:12px; color:#777; margin:10px 0;}
 .footer {text-align:center; margin:20px 0; font-size:12px; color:#777;}
 hr {margin:25px 0; border-color:#eee;}
-/* Modal styles for Madarsa popup */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.5);
-}
-.modal-content {
-  background-color: #fefefe;
-  margin: 10% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 90%;
-  max-width: 600px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-}
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
+/* Highlighted Zakat Payable - BIG & CATCHY */
+.highlight-zakat {
+  font-size: 32px !important;
   font-weight: bold;
-  cursor: pointer;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  border-radius: 12px;
+  border: 3px solid #d4af37;
+  background: linear-gradient(135deg, #fffde7, #fff8e1);
+  box-shadow: 0 4px 15px rgba(212,175,55,0.4);
 }
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
+.highlight-zakat .amount {
+  color: #c62828; /* red for due */
+  font-size: 40px;
 }
-@media (max-width:600px) {.container {padding:15px;} .modal-content {margin: 20% auto;}}
+.highlight-zakat.zero .amount {
+  color: #2e7d32; /* green for zero */
+}
+.highlight-zakat .status {
+  font-size: 20px;
+  margin-top: 10px;
+  color: #424242;
+}
+@media (max-width:600px) {
+  .highlight-zakat {font-size:26px !important;}
+  .highlight-zakat .amount {font-size:32px;}
+}
 </style>
 </head>
 <body>
@@ -200,6 +193,7 @@ hr {margin:25px 0; border-color:#eee;}
 </div>
 
 <script>
+// Global variables for PDF access
 let rates = {
   gold_24k: 15738,
   gold_22k: 14426,
@@ -269,7 +263,7 @@ function calculate() {
 
   nisabSilver = 612.36 * (+silverPrice.value || 270);
   nisabGold   = 87.48  * (+goldPrice.value   || 15738);
-  const nisabThreshold = nisabSilver;
+  const nisabThreshold = nisabSilver;  // Silver-based Nisab (common Hanafi practice)
 
   let personalZakat = 0;
   let bizZakat = 0;
@@ -298,14 +292,18 @@ function calculate() {
     `Business Net: ₹${formatINR(bizNet)}\n` +
     `Zakat portion: ₹${formatINR(bizZakat)}`;
 
-  document.getElementById("finalSummary").innerText =
-    `TOTAL ZAKAT PAYABLE: ₹\( {formatINR(totalZakat)}\n \){statusMessage}`;
+  // Highlighted Zakat Payable on page
+  const highlightClass = totalZakat > 0 ? '' : 'zero';
+  document.getElementById("finalSummary").innerHTML = `
+    <div class="highlight-zakat ${highlightClass}">
+      <div class="amount">TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}</div>
+      <div class="status">${statusMessage}</div>
+    </div>`;
 
   document.getElementById("nisabInfo").innerHTML =
     `Nisab (silver basis - recommended): ≈ ₹${formatINR(nisabSilver)} (612.36 g)<br>` +
     `Nisab (gold basis): ≈ ₹${formatINR(nisabGold)} (87.48 g)<br>` +
-    `<strong>Your total net wealth: ₹${formatINR(totalNetWealth)}</strong><br>` +
-    statusMessage;
+    `<strong>Your total net wealth: ₹${formatINR(totalNetWealth)}</strong><br>`;
 }
 
 document.querySelectorAll("input").forEach(el => el.addEventListener("input", calculate));
@@ -343,9 +341,17 @@ function downloadPDF() {
   doc.text(document.getElementById("hijriDate").innerText, 20, y);
   y += 12;
 
-  doc.setFontSize(14);
-  doc.setTextColor(220, 53, 69);
-  doc.text(document.getElementById("finalSummary").innerText, 105, y, { align: "center" });
+  // Highlighted Zakat Payable in PDF
+  doc.setFontSize(16);
+  doc.setTextColor(totalZakat > 0 ? 200 : 50, totalZakat > 0 ? 50 : 120, totalZakat > 0 ? 50 : 50);
+  doc.setFillColor(totalZakat > 0 ? 255 : 240, totalZakat > 0 ? 235 : 255, totalZakat > 0 ? 238 : 245);
+  doc.rect(15, y - 5, 180, 18, 'F');
+  doc.text(`TOTAL ZAKAT PAYABLE: ₹${formatINR(totalZakat)}`, 105, y + 6, { align: "center" });
+  y += 25;
+
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.text(statusMessage, 105, y, { align: "center" });
   y += 15;
 
   doc.setFontSize(12);
@@ -366,8 +372,8 @@ function downloadPDF() {
       ['Other liquid', formatINR(+personalOther.value||0)],
       ['Total Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
       ['Liabilities', formatINR(+personalLiabilities.value||0)],
-      ['Net Personal', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0) )],
-      ['Zakat portion', formatINR( Math.max(0, ((+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) - (+personalLiabilities.value||0)) / 40 ) )]
+      ['Net Personal', formatINR(personalNet)],
+      ['Zakat portion', formatINR(personalZakat)]
     ],
     margin: {left:20, right:20},
     theme: 'grid',
@@ -392,8 +398,8 @@ function downloadPDF() {
       ['Receivables', formatINR(+bizReceivables.value||0)],
       ['Total Assets', formatINR( (+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) )],
       ['Liabilities', formatINR(+bizLiabilities.value||0)],
-      ['Net Business', formatINR( (+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) - (+bizLiabilities.value||0) )],
-      ['Zakat portion', formatINR( Math.max(0, ((+stock.value||0) + (+raw.value||0) + (+finished.value||0) + (+bizCash.value||0) + (+bizBank.value||0) + (+bizReceivables.value||0) - (+bizLiabilities.value||0)) / 40 ) )]
+      ['Net Business', formatINR(bizNet)],
+      ['Zakat portion', formatINR(bizZakat)]
     ],
     margin: {left:20, right:20},
     theme: 'grid',
@@ -412,7 +418,6 @@ function downloadPDF() {
   doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
   doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 10;
 
-  // Madarsa section in PDF
   doc.setFontSize(12);
   doc.setTextColor(0, 100, 0);
   doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, { align: "center" });
@@ -436,20 +441,16 @@ function downloadPDF() {
   doc.save(`Zakat_Report_\( {(userName.value || 'User').trim()}_ \){new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-// Modal functions for page popup
+// Modal functions
 function openMadarsaModal() {
   document.getElementById("madarsaModal").style.display = "block";
 }
-
 function closeMadarsaModal() {
   document.getElementById("madarsaModal").style.display = "none";
 }
-
-// Close modal when clicking outside
 window.onclick = function(event) {
-  const modal = document.getElementById("madarsaModal");
-  if (event.target == modal) {
-    modal.style.display = "none";
+  if (event.target == document.getElementById("madarsaModal")) {
+    closeMadarsaModal();
   }
 }
 
