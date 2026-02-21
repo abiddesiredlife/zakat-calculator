@@ -40,7 +40,7 @@ hr {margin:25px 0; border-color:#eee;}
   <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
   <div id="hijriDate" class="small"></div>
 
-  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Use current market rates. Only current/short-term liabilities are deducted. Zakat = 2.5% of net zakatable wealth above Nisab (if held for one Hijri year).</p>
+  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Prices auto-update from rates.json (update daily via GitHub repo).</p>
 
   <label>Optional Name (పేరు)</label>
   <input type="text" id="userName" placeholder="Your name (optional for PDF)">
@@ -57,16 +57,16 @@ hr {margin:25px 0; border-color:#eee;}
     <option value="0.916" data-karat="22k" selected>22K (common jewellery)</option>
     <option value="0.75" data-karat="18k">18K</option>
   </select>
-  <div class="guide">Select purity → price updates automatically to that karat's rate (from rates.json). For daily updates, edit rates.json in GitHub repo.</div>
+  <div class="guide">Changing purity auto-updates the price below to match the karat rate from rates.json.</div>
 
   <label>Gold Price (per gram for selected purity) - బంగారం ధర (ఎంచుకున్న స్వచ్ఛతకు గ్రాముకు)</label>
-  <input type="number" id="goldPrice" value="15700" step="10" placeholder="Per gram rate for selected purity (auto-updates)">
+  <input type="number" id="goldPrice" value="15700" step="10" placeholder="Auto-updates based on purity" readonly style="background:#f9f9f9;">
 
   <label>Silver (grams) - వెండి (గ్రాములు)</label>
-  <input type="number" id="silverGrams" min="0" step="any" placeholder="Total silver weight in grams (utensils, bars, coins etc.)">
+  <input type="number" id="silverGrams" min="0" step="any" placeholder="Total silver weight in grams">
 
   <label>Silver Price (per gram) - వెండి ధర (గ్రాముకు)</label>
-  <input type="number" id="silverPrice" value="270" step="1" placeholder="Current silver rate (≈ ₹270 today)">
+  <input type="number" id="silverPrice" value="270" step="1" placeholder="From rates.json" readonly style="background:#f9f9f9;">
 
   <label>Cash in Hand - నగదు (ఇంట్లో / దగ్గర)</label>
   <input type="number" id="personalCash" min="0" step="any" placeholder="Physical cash you currently have">
@@ -135,12 +135,17 @@ hr {margin:25px 0; border-color:#eee;}
     <button class="button">Pay via UPI</button>
   </a>
 
-  <div class="footer">Powered by ن Enterprises</div>
+  <div class="footer">Powered by ن Enterprises | Prices from rates.json (last updated in repo)</div>
 
 </div>
 
 <script>
-let rates = { gold_24k: 15700, gold_22k: 14375, gold_18k: 11775, silver: 270 }; // Fallback defaults
+let rates = {
+  gold_24k: 15700,
+  gold_22k: 14375,
+  gold_18k: 11775,
+  silver: 270
+}; // Fallback
 
 function formatINR(num) {
   return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -166,6 +171,14 @@ function showHijri() {
     "Hijri Date (Global): " + day + " " + months[month - 1] + " " + year + " AH";
 }
 showHijri();
+
+function updateGoldPrice() {
+  const puritySelect = document.getElementById('goldPurity');
+  const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
+  const priceKey = `gold_${selectedKarat}`;
+  document.getElementById('goldPrice').value = rates[priceKey] || rates.gold || 15700; // fallback to old 'gold' key if exists
+  calculate();
+}
 
 function calculate() {
   const goldVal = (+goldGrams.value || 0) * (+goldPrice.value || 0);
@@ -206,38 +219,33 @@ function calculate() {
   const nisabGold   = 87.48  * (+goldPrice.value   || 15700);
 
   document.getElementById("nisabInfo").innerHTML =
-    `Nisab (silver basis): ≈ ₹${formatINR(nisabSilver)} (612.36 g silver)<br>` +
-    `Nisab (gold basis):   ≈ ₹${formatINR(nisabGold)} (87.48 g gold)<br>` +
+    `Nisab (silver basis): ≈ ₹${formatINR(nisabSilver)} (612.36 g)<br>` +
+    `Nisab (gold basis):   ≈ ₹${formatINR(nisabGold)} (87.48 g)<br>` +
     `<strong>Your total net wealth: ₹${formatINR(personalNet + bizNet)}</strong><br>` +
     ((personalNet + bizNet) >= Math.min(nisabSilver, nisabGold) ?
       "✅ You meet/exceed Nisab → Zakat is due (if held for 1 Hijri year)" :
       "❌ Below Nisab → No Zakat due currently");
 }
 
-document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calculate));
+document.querySelectorAll("input, select").forEach(el => {
+  if (el.id !== 'goldPurity') el.addEventListener("input", calculate);
+});
+
+document.getElementById('goldPurity').addEventListener('change', updateGoldPrice);
 
 async function loadRates() {
   try {
     const response = await fetch('rates.json');
-    rates = await response.json();
-    // Set initial prices based on default purity (22K)
-    const puritySelect = document.getElementById('goldPurity');
-    const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
-    document.getElementById('goldPrice').value = rates[`gold_${selectedKarat}`] || 15700;
-    document.getElementById('silverPrice').value = rates.silver || 270;
-    calculate();
+    if (response.ok) {
+      rates = await response.json();
+      document.getElementById('silverPrice').value = rates.silver || 270;
+      updateGoldPrice(); // Apply to current purity
+    }
   } catch (error) {
     console.error('Failed to load rates.json:', error);
-    // Use fallback defaults
   }
-}
-
-document.getElementById('goldPurity').addEventListener('change', () => {
-  const puritySelect = document.getElementById('goldPurity');
-  const selectedKarat = puritySelect.options[puritySelect.selectedIndex].dataset.karat;
-  document.getElementById('goldPrice').value = rates[`gold_${selectedKarat}`] || document.getElementById('goldPrice').value;
   calculate();
-});
+}
 
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
@@ -270,7 +278,7 @@ function downloadPDF() {
     startY: y,
     head: [['Description', 'Amount (₹)']],
     body: [
-      ['Gold', formatINR((+goldGrams.value||0)*(+goldPrice.value||0))],
+      ['Gold (' + document.getElementById('goldPurity').options[document.getElementById('goldPurity').selectedIndex].text + ')', formatINR((+goldGrams.value||0)*(+goldPrice.value||0))],
       ['Silver', formatINR((+silverGrams.value||0)*(+silverPrice.value||0))],
       ['Cash in hand', formatINR(+personalCash.value||0)],
       ['Bank balance', formatINR(+personalBank.value||0)],
@@ -290,6 +298,7 @@ function downloadPDF() {
   });
   y = doc.lastAutoTable.finalY + 12;
 
+  // Business table (same as before)
   doc.setFontSize(12);
   doc.text("Business Section (వ్యాపారం)", 20, y);
   y += 8;
@@ -324,8 +333,8 @@ function downloadPDF() {
   y += 5;
 
   doc.text("- Zakat @ 2.5% on net zakatable wealth", 20, y); y += 6;
-  doc.text("- Consult scholar for your specific case", 20, y); y += 6;
-  doc.text("- Prices from rates.json – update daily via GitHub", 20, y);
+  doc.text("- Prices from rates.json (updated: " + (rates.lastUpdated || 'unknown') + ")", 20, y); y += 6;
+  doc.text("- Consult scholar for rulings", 20, y);
 
   doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
 }
