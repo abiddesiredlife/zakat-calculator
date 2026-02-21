@@ -88,7 +88,6 @@ hr{margin:25px 0;}
 <div class="container">
 
 <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
-
 <div id="hijriDate" class="small"></div>
 
 <label>Optional Name (పేరు)</label>
@@ -129,27 +128,6 @@ hr{margin:25px 0;}
 <label>Total Personal Liabilities (Current Only)</label>
 <input type="number" id="personalLiabilities">
 
-<details>
-<summary>Form A Explanation (Click)</summary>
-Sona, chandi har shakal me include karein.  
-Cash ghar, bank, shop sab include karein.  
-Udhar diya paisa jo wapas milna hai include karein.  
-Shares business niyat se ho to market value likhein.  
-Crypto bhi include karein.  
-Insurance ka asal jama amount include karein.  
-Customer se aana baqi paisa include karein.
-</details>
-
-<details>
-<summary>Form B Explanation (Click)</summary>
-Sirf current due liabilities minus karein.  
-Loan EMI ka sirf jo is saal payable hai.  
-Gas, electricity, tax unpaid amount.  
-Workers salary unpaid.  
-Rent unpaid.  
-Past zakat unpaid.
-</details>
-
 <div class="result-box" id="personalResult"></div>
 
 <hr>
@@ -188,11 +166,13 @@ Past zakat unpaid.
 <h3>Support Madarsa</h3>
 UPI: muftiasifali94@okhdfcbank
 
+<img src="donation-qr.png" style="width:200px;display:block;margin:10px auto;">
+
 <a href="upi://pay?pa=muftiasifali94@okhdfcbank&pn=Zakat&cu=INR">
 <button class="button">Pay via UPI</button>
 </a>
 
-<div class="footer">Noon Enterprises</div>
+<div class="footer">Powered by ن Enterprises</div>
 
 </div>
 
@@ -202,7 +182,6 @@ function formatINR(num){
 return num.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-/* Hijri */
 function showHijri(){
 const today=new Date();
 const jd=Math.floor((today/86400000)+2440587.5);
@@ -238,11 +217,14 @@ goldVal+silverVal+
 (+personalCrypto.value||0)+
 (+personalOther.value||0);
 
-let personalNet=personalAssets-(+personalLiabilities.value||0);
+let personalLiab=(+personalLiabilities.value||0);
+let personalNet=personalAssets-personalLiab;
 let personalZakat=personalNet>0?personalNet/40:0;
 
 personalResult.innerText=
-"Personal Net: ₹"+formatINR(personalNet)+
+"Total Personal Assets: ₹"+formatINR(personalAssets)+
+"\nPersonal Liabilities: ₹"+formatINR(personalLiab)+
+"\nPersonal Net: ₹"+formatINR(personalNet)+
 "\nZakat (2.5%): ₹"+formatINR(personalZakat);
 
 let bizAssets=
@@ -253,25 +235,25 @@ let bizAssets=
 (+bizBank.value||0)+
 (+bizReceivables.value||0);
 
-let bizNet=bizAssets-(+bizLiabilities.value||0);
+let bizLiab=(+bizLiabilities.value||0);
+let bizNet=bizAssets-bizLiab;
 let bizZakat=bizNet>0?bizNet/40:0;
 
 businessResult.innerText=
-"Business Net: ₹"+formatINR(bizNet)+
+"Total Business Assets: ₹"+formatINR(bizAssets)+
+"\nBusiness Liabilities: ₹"+formatINR(bizLiab)+
+"\nBusiness Net: ₹"+formatINR(bizNet)+
 "\nZakat (2.5%): ₹"+formatINR(bizZakat);
 
 let totalZakat=personalZakat+bizZakat;
 
 finalSummary.innerText=
-"Total Zakat Payable: ₹"+formatINR(totalZakat);
-
+"TOTAL ZAKAT PAYABLE: ₹"+formatINR(totalZakat);
 }
 
 document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate));
 
-/* Professional PDF */
 function downloadPDF(){
-
 const { jsPDF }=window.jspdf;
 let doc=new jsPDF();
 let y=20;
@@ -286,11 +268,9 @@ doc.text("Date: "+new Date().toLocaleDateString(),150,y);
 y+=8;
 
 doc.text(document.getElementById("hijriDate").innerText,20,y);
-y+=10;
+y+=12;
 
-doc.text("Personal Net: ₹"+formatINR((+personalCash.value||0)),20,y);
-y+=8;
-
+doc.setFontSize(13);
 doc.text(finalSummary.innerText,105,y,{align:"center"});
 
 doc.save("Zakat_Report.pdf");
