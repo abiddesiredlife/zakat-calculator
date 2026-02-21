@@ -6,8 +6,10 @@
 <title>Know Your Zakat Today - జకాత్ లెక్కింపు</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<!-- Updated reliable CDNs for jsPDF + autoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqzqGV89gcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" integrity="sha512-2/7vX6YJ0r7QeGfW2mP9kT6qX9d3v8p3V3w+0E8G4J6oG3wK8lV6c8j6d3Qb7s1p2s3S0D8pK3lA2b3Y3fC6vQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <style>
 body {margin:0; font-family:Arial, sans-serif; background:#f4f4f4;}
@@ -40,7 +42,7 @@ hr {margin:25px 0; border-color:#eee;}
   <h2>Know Your Zakat Today (జకాత్ లెక్కింపు)</h2>
   <div id="hijriDate" class="small"></div>
 
-  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year.</p>
+  <p class="guide"><strong>మార్గదర్శకం / Guidance:</strong> Enter values as on your Zakat due date. Zakat is only due if net wealth ≥ Nisab and held for 1 Hijri year. Prices from rates.json (update daily in repo).</p>
 
   <label>Optional Name (పేరు)</label>
   <input type="text" id="userName" placeholder="Your name (optional for PDF)">
@@ -145,8 +147,15 @@ let rates = {
   gold_22k: 14426,
   gold_18k: 11803,
   silver: 270,
-  lastUpdated: "21 Feb 2026"
+  lastUpdated: "21 Feb 2026 (Hyderabad)"
 };
+
+let totalNetWealth = 0;
+let nisabSilver = 0;
+let nisabGold = 0;
+let nisabThreshold = 0;
+let totalZakat = 0;
+let statusMessage = "";
 
 function formatINR(num) {
   return num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -199,16 +208,16 @@ function calculate() {
   const bizLiab = (+bizLiabilities.value || 0);
   const bizNet = Math.max(0, bizAssets - bizLiab);
 
-  const totalNetWealth = personalNet + bizNet;
+  totalNetWealth = personalNet + bizNet;
 
-  const nisabSilver = 612.36 * (+silverPrice.value || 270);
-  const nisabGold   = 87.48  * (+goldPrice.value   || 15738);
-  const nisabThreshold = nisabSilver;  // Using silver-based Nisab (common Hanafi practice in India)
+  nisabSilver = 612.36 * (+silverPrice.value || 270);
+  nisabGold   = 87.48  * (+goldPrice.value   || 15738);
+  nisabThreshold = nisabSilver;  // Silver-based Nisab (Hanafi / common in India)
 
   let personalZakat = 0;
   let bizZakat = 0;
-  let totalZakat = 0;
-  let statusMessage = "";
+  totalZakat = 0;
+  statusMessage = "";
 
   if (totalNetWealth >= nisabThreshold) {
     personalZakat = personalNet / 40;
@@ -260,93 +269,124 @@ async function loadRates() {
 }
 
 function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
+  if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+    alert("PDF library failed to load. Check internet connection, disable ad-blockers/extensions, or try Chrome/Edge browser.");
+    console.error("jsPDF not loaded");
+    return;
+  }
 
-  doc.setFontSize(18);
-  doc.setTextColor(212, 175, 55);
-  doc.text("Zakat Calculation Report", 105, y, { align: "center" });
-  y += 12;
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
 
-  doc.setFontSize(11);
-  doc.text("Name: " + (userName.value.trim() || "N/A"), 20, y);
-  doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 140, y);
-  y += 8;
-  doc.text(document.getElementById("hijriDate").innerText, 20, y);
-  y += 12;
+    doc.setFontSize(18);
+    doc.setTextColor(212, 175, 55);
+    doc.text("Zakat Calculation Report", 105, y, { align: "center" });
+    y += 12;
 
-  doc.setFontSize(14);
-  doc.setTextColor(220, 53, 69);
-  doc.text(document.getElementById("finalSummary").innerText, 105, y, { align: "center" });
-  y += 15;
+    doc.setFontSize(11);
+    doc.setTextColor(0);
+    doc.text("Name: " + (userName.value.trim() || "N/A"), 20, y);
+    doc.text("Date: " + new Date().toLocaleDateString('en-IN'), 140, y);
+    y += 8;
+    doc.text(document.getElementById("hijriDate").innerText, 20, y);
+    y += 12;
 
-  doc.setFontSize(12);
-  doc.text("Personal Section", 20, y);
-  y += 8;
+    doc.setFontSize(14);
+    doc.setTextColor(220, 53, 69);
+    doc.text(document.getElementById("finalSummary").innerText, 105, y, { align: "center" });
+    y += 15;
 
-  doc.autoTable({
-    startY: y,
-    head: [['Description', 'Amount (₹)']],
-    body: [
-      ['Gold', formatINR((+goldGrams.value||0) * (+goldPrice.value||0))],
-      ['Silver', formatINR((+silverGrams.value||0) * (+silverPrice.value||0))],
-      ['Cash in hand', formatINR(+personalCash.value||0)],
-      ['Bank balance', formatINR(+personalBank.value||0)],
-      ['Receivables', formatINR(+personalReceivables.value||0)],
-      ['Investments', formatINR(+personalInvestments.value||0)],
-      ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
-      ['Other liquid', formatINR(+personalOther.value||0)],
-      ['Total Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
-      ['Liabilities', formatINR(+personalLiabilities.value||0)],
-      ['Net Personal', formatINR(personalNet)],
-      ['Zakat portion', formatINR(personalZakat)]
-    ],
-    margin: {left:20, right:20},
-    theme: 'grid',
-    styles: {fontSize:9, cellPadding:3},
-    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
-  });
-  y = doc.lastAutoTable.finalY + 12;
+    doc.setFontSize(12);
+    doc.text("Personal Section", 20, y);
+    y += 8;
 
-  doc.setFontSize(12);
-  doc.text("Business Section", 20, y);
-  y += 8;
+    doc.autoTable({
+      startY: y,
+      head: [['Description', 'Amount (₹)']],
+      body: [
+        ['Gold', formatINR((+goldGrams.value||0) * (+goldPrice.value||0))],
+        ['Silver', formatINR((+silverGrams.value||0) * (+silverPrice.value||0))],
+        ['Cash in hand', formatINR(+personalCash.value||0)],
+        ['Bank balance', formatINR(+personalBank.value||0)],
+        ['Receivables', formatINR(+personalReceivables.value||0)],
+        ['Investments', formatINR(+personalInvestments.value||0)],
+        ['Crypto / Digital', formatINR(+personalCrypto.value||0)],
+        ['Other liquid', formatINR(+personalOther.value||0)],
+        ['Total Assets', formatINR( (+goldGrams.value||0)*(+goldPrice.value||0) + (+silverGrams.value||0)*(+silverPrice.value||0) + (+personalCash.value||0) + (+personalBank.value||0) + (+personalReceivables.value||0) + (+personalInvestments.value||0) + (+personalCrypto.value||0) + (+personalOther.value||0) )],
+        ['Liabilities', formatINR(+personalLiabilities.value||0)],
+        ['Net Personal', formatINR(personalNet)],
+        ['Zakat portion', formatINR(personalZakat)]
+      ],
+      margin: {left:20, right:20},
+      theme: 'grid',
+      styles: {fontSize:9, cellPadding:3},
+      headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
+    });
+    y = doc.lastAutoTable.finalY + 12;
 
-  doc.autoTable({
-    startY: y,
-    head: [['Description', 'Amount (₹)']],
-    body: [
-      ['Closing Stock', formatINR(+stock.value||0)],
-      ['Raw Materials', formatINR(+raw.value||0)],
-      ['Finished Goods', formatINR(+finished.value||0)],
-      ['Business Cash', formatINR(+bizCash.value||0)],
-      ['Business Bank', formatINR(+bizBank.value||0)],
-      ['Receivables', formatINR(+bizReceivables.value||0)],
-      ['Total Assets', formatINR(bizAssets)],
-      ['Liabilities', formatINR(+bizLiabilities.value||0)],
-      ['Net Business', formatINR(bizNet)],
-      ['Zakat portion', formatINR(bizZakat)]
-    ],
-    margin: {left:20, right:20},
-    theme: 'grid',
-    styles: {fontSize:9, cellPadding:3},
-    headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
-  });
-  y = doc.lastAutoTable.finalY + 12;
+    doc.setFontSize(12);
+    doc.text("Business Section", 20, y);
+    y += 8;
 
-  doc.setFontSize(10);
-  doc.setTextColor(80);
-  doc.text("Nisab Information & Notes:", 20, y); y += 7;
-  doc.text("Nisab (silver): ≈ ₹" + formatINR(nisabSilver), 25, y); y += 6;
-  doc.text("Your net wealth: ₹" + formatINR(totalNetWealth), 25, y); y += 6;
-  doc.text(document.getElementById("nisabInfo").innerText.split('\n').pop().trim(), 25, y); y += 10;
+    doc.autoTable({
+      startY: y,
+      head: [['Description', 'Amount (₹)']],
+      body: [
+        ['Closing Stock', formatINR(+stock.value||0)],
+        ['Raw Materials', formatINR(+raw.value||0)],
+        ['Finished Goods', formatINR(+finished.value||0)],
+        ['Business Cash', formatINR(+bizCash.value||0)],
+        ['Business Bank', formatINR(+bizBank.value||0)],
+        ['Receivables', formatINR(+bizReceivables.value||0)],
+        ['Total Assets', formatINR(bizAssets)],
+        ['Liabilities', formatINR(+bizLiabilities.value||0)],
+        ['Net Business', formatINR(bizNet)],
+        ['Zakat portion', formatINR(bizZakat)]
+      ],
+      margin: {left:20, right:20},
+      theme: 'grid',
+      styles: {fontSize:9, cellPadding:3},
+      headStyles: {fillColor:[212,175,55], textColor:[0,0,0]}
+    });
+    y = doc.lastAutoTable.finalY + 15;
 
-  doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
-  doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 6;
-  doc.text("- Consult a scholar for your situation", 20, y);
+    doc.setFontSize(10);
+    doc.setTextColor(80);
+    doc.text("Nisab & Notes:", 20, y); y += 7;
+    doc.text("Nisab (silver): ≈ ₹" + formatINR(nisabSilver), 25, y); y += 6;
+    doc.text("Your net wealth: ₹" + formatINR(totalNetWealth), 25, y); y += 6;
+    doc.text(statusMessage, 25, y); y += 10;
 
-  doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
+    doc.text("- Zakat @ 2.5% only if above Nisab", 20, y); y += 6;
+    doc.text("- Prices from rates.json - last: " + (rates.lastUpdated || 'unknown'), 20, y); y += 10;
+
+    // Added Madarsa appeal section in PDF
+    doc.setFontSize(12);
+    doc.setTextColor(0, 100, 0);
+    doc.text("Support Madarsa Salihaat Lilbanaat Khamammam", 105, y, {align: "center"});
+    y += 8;
+
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.text("Ek Ladki ki Monthly Kafalat: ₹1800/-", 20, y); y += 6;
+    doc.text("Alhamdulillah, 20 ladkiyon ne Nazira Quran aur Deen ki bunyadi maloomat hasil ki.", 20, y); y += 6;
+    doc.text("6 bachiyon ne tailoring training mukammal ki. Hifz-e-Quran aur Aalimiyat jaari hai.", 20, y); y += 6;
+    doc.text("Aap apni Zakat, Sadaqa, Fitrana, Atiya se madad farma sakte hain.", 20, y); y += 8;
+
+    doc.text("Account Details:", 20, y); y += 6;
+    doc.text("Account No: 1200000485740", 25, y); y += 6;
+    doc.text("IFSC: CNRB0008484", 25, y); y += 6;
+    doc.text("Mufti/Qazi: Asif Ali Sayeed Qasmi", 25, y); y += 6;
+    doc.text("Phone: 95022 55318 / 97586 60669", 25, y); y += 6;
+    doc.text("UPI: muftiasifali94@okhdfcbank", 25, y);
+
+    doc.save(`Zakat_Report_\( {userName.value.trim() || 'User'}_ \){new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (err) {
+    console.error("PDF error:", err);
+    alert("PDF creation failed: " + err.message + "\nCheck console (F12) or try refreshing / different browser.");
+  }
 }
 
 window.onload = () => {
